@@ -82,23 +82,21 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 material.wireframe = true;
 gui.add(material, 'wireframe');
 
-const planeGeometry = new THREE.PlaneGeometry(30, 30, 1, 1);
+const planeGeometry = new THREE.PlaneGeometry(30, 30, 100, 100);
 
 const plane = new THREE.Mesh(planeGeometry, material);
 plane.rotation.x = -Math.PI / 2;
+plane.receiveShadow = true;
+plane.castShadow = true;
 
 // ---------
 const count = plane.geometry.getAttribute('position').count;
 
+console.log(count);
 for (let i = 0; i <= count; i++) {
   const x = plane.geometry.getAttribute('position').getX(i);
   const y = plane.geometry.getAttribute('position').getY(i);
   const z = plane.geometry.getAttribute('position').getZ(i);
-
-  console.log(x, y, z)
-  if (i === 0) {
-    plane.geometry.getAttribute('position').setZ(i, 10);
-  }
 }
 // ---------
 
@@ -110,8 +108,39 @@ scene.add(plane);
  */
 const clock = new THREE.Clock();
 
+  // DIRECTIONAL LIGHT
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0)
+  directionalLight.position.x += 20
+  directionalLight.position.y += 20
+  directionalLight.position.z += 20
+  directionalLight.castShadow = true
+  directionalLight.shadow.mapSize.width = 4096;
+  directionalLight.shadow.mapSize.height = 4096;
+ 
+  const d = 25;
+  directionalLight.shadow.camera.left = - d;
+  directionalLight.shadow.camera.right = d;
+  directionalLight.shadow.camera.top = d;
+  directionalLight.shadow.camera.bottom = - d;
+  directionalLight.position.z = -30;
+
+scene.add( directionalLight );
+
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
+
+  for (let i = 0; i <= count; i++) {
+    const x = plane.geometry.getAttribute('position').getX(i);
+    const y = plane.geometry.getAttribute('position').getY(i);
+    const z = plane.geometry.getAttribute('position').getZ(i);
+
+    const xsin = Math.sin(x + elapsedTime);
+
+    plane.geometry.getAttribute('position').setZ(i, xsin);
+  }
+
+  plane.geometry.computeVertexNormals();
+  plane.geometry.getAttribute('position').needsUpdate = true;
 
   // Update controls
   controls.update();
