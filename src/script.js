@@ -2,6 +2,9 @@ import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import GUI from 'lil-gui';
+import { noise } from 'perlin';
+
+noise.seed(Math.random());
 
 //Debug UI
 const gui = new GUI();
@@ -59,7 +62,7 @@ scene.add(camera);
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight('0x00fffc', 0.3);
+const directionalLight = new THREE.DirectionalLight(0x433f40, 1);
 directionalLight.position.set(10, 10, 1);
 
 scene.add(directionalLight);
@@ -90,18 +93,16 @@ const sliders = {
   heightMap: 'none',
 };
 
-const disMap = textureLoader.setPath('/textures/').load(sliders.heightMap);
+// const disMap = textureLoader.setPath('/textures/').load(sliders.heightMap);
 
-const material = new THREE.MeshStandardMaterial({
-  displacementMap: disMap,
-  displacementScale: 4,
+const material = new THREE.MeshLambertMaterial({
   side: THREE.DoubleSide,
 });
 
 material.wireframe = false;
 gui.add(material, 'wireframe');
 
-const planeGeometry = new THREE.PlaneGeometry(30, 30, 100, 100);
+const planeGeometry = new THREE.PlaneGeometry(50, 50, 256, 256);
 
 // const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
 // const sphereMaterial = new THREE.MeshStandardMaterial();
@@ -115,33 +116,58 @@ plane.rotation.x = -Math.PI / 2;
 plane.receiveShadow = true;
 plane.castShadow = true;
 
-gui
-  .add(material, 'displacementScale')
-  .min(0)
-  .max(10)
-  .step(0.0001)
-  .onChange(() => {
-    plane.geometry.computeVertexNormals();
-  });
+// gui
+//   .add(material, 'displacementScale')
+//   .min(0)
+//   .max(10)
+//   .step(0.0001)
+//   .onChange(() => {
+//     plane.geometry.computeVertexNormals();
+//   });
 
-gui
-  .add(sliders, 'heightMap')
-  .options(['none', 'perlin-noise.png', 'hello.jpg'])
-  .onChange((value) => {
-    material.displacementMap = textureLoader.setPath('/textures/').load(value);
+// gui
+//   .add(sliders, 'heightMap')
+//   .options(['none', 'perlin-noise.png', 'hello.jpg'])
+//   .onChange((value) => {
+//     material.displacementMap = textureLoader.setPath('/textures/').load(value);
 
-    plane.geometry.computeVertexNormals();
-  });
+//     plane.geometry.computeVertexNormals();
+//   });
 
 // ---------
 const count = plane.geometry.getAttribute('position').count;
+const config = {
+  peak: 0,
+  smoothing: 1,
+};
 
-for (let i = 0; i <= count; i++) {
-  const position = plane.geometry.getAttribute('position');
-  const x = position.getX(i);
-  const y = position.getY(i);
-  const z = position.getZ(i);
+function compute(peak, smoothing) {
+  for (let i = 0; i < count; i++) {
+    const position = plane.geometry.getAttribute('position');
+    const x = position.getX(i);
+    const y = position.getY(i);
+    const z = position.getZ(i);
+
+
+    position.setZ(
+      i,
+      peak * Math.abs(noise.simplex2(x / smoothing, y / smoothing))
+    );
+  }
 }
+
+compute(config.peak, config.smoothing);
+
+gui.add(config, 'peak', 0, 10, 0.01).onChange((value) => {
+  compute(value, config.smoothing);
+});
+
+gui.add(config, 'smoothing', 1, 10, 0.01).onChange((value) => {
+  compute(config.peak, value);
+});
+
+
+console.log(plane.geometry.getAttribute('position'))
 // ---------
 
 camera.lookAt(plane.position);
