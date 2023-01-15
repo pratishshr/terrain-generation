@@ -18,15 +18,6 @@ scene.background = new THREE.Color(0x000000);
 
 // gui.add(material, 'aoMapIntensity').min(0).max(10).step(0.0001);
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-scene.add(ambientLight);
-
-// const pointLight = new THREE.PointLight(0xffffff, 0.5);
-// pointLight.position.x = 2;
-// pointLight.position.y = 3;
-// pointLight.position.z = 4;
-// scene.add(pointLight);
-
 /**
  * Sizes
  */
@@ -64,6 +55,22 @@ camera.position.set(30, 30.5, 30.4);
 
 scene.add(camera);
 
+/** LIGHTS */
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight('0x00fffc', 0.3);
+directionalLight.position.set(10, 10, 1);
+
+scene.add(directionalLight);
+
+// Helpers
+// const directionalLightHelper = new THREE.DirectionalLightHelper(
+//   directionalLight,
+//   0.2
+// );
+// scene.add(directionalLightHelper);
+
 // Controls
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
@@ -78,23 +85,53 @@ renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 const textureLoader = new THREE.TextureLoader();
-const disMap = textureLoader.load('/textures/template.jpg');
+
+const sliders = {
+  heightMap: 'none',
+};
+
+const disMap = textureLoader.setPath('/textures/').load(sliders.heightMap);
 
 const material = new THREE.MeshStandardMaterial({
   displacementMap: disMap,
-  displacementScale: 1,
-  side: THREE.DoubleSide
+  displacementScale: 4,
+  side: THREE.DoubleSide,
 });
 
-material.wireframe = true;
+material.wireframe = false;
 gui.add(material, 'wireframe');
 
-const planeGeometry = new THREE.PlaneGeometry(30, 30, 256, 256);
+const planeGeometry = new THREE.PlaneGeometry(30, 30, 100, 100);
+
+// const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+// const sphereMaterial = new THREE.MeshStandardMaterial();
+
+// const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+// sphereMesh.position.setY(5);
+// scene.add(sphereMesh);
 
 const plane = new THREE.Mesh(planeGeometry, material);
 plane.rotation.x = -Math.PI / 2;
 plane.receiveShadow = true;
 plane.castShadow = true;
+
+gui
+  .add(material, 'displacementScale')
+  .min(0)
+  .max(10)
+  .step(0.0001)
+  .onChange(() => {
+    plane.geometry.computeVertexNormals();
+  });
+
+gui
+  .add(sliders, 'heightMap')
+  .options(['none', 'perlin-noise.png', 'hello.jpg'])
+  .onChange((value) => {
+    material.displacementMap = textureLoader.setPath('/textures/').load(value);
+
+    plane.geometry.computeVertexNormals();
+  });
 
 // ---------
 const count = plane.geometry.getAttribute('position').count;
@@ -114,25 +151,6 @@ scene.add(plane);
  * Animate
  */
 const clock = new THREE.Clock();
-
-// DIRECTIONAL LIGHT
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
-directionalLight.position.x += 20;
-directionalLight.position.y += 20;
-directionalLight.position.z += 20;
-directionalLight.castShadow = true;
-directionalLight.shadow.mapSize.width = 4096;
-directionalLight.shadow.mapSize.height = 4096;
-
-const d = 25;
-directionalLight.shadow.camera.left = -d;
-directionalLight.shadow.camera.right = d;
-directionalLight.shadow.camera.top = d;
-directionalLight.shadow.camera.bottom = -d;
-directionalLight.position.z = -30;
-
-scene.add(directionalLight);
-
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
@@ -141,9 +159,9 @@ const tick = () => {
   //   const y = plane.geometry.getAttribute('position').getY(i);
   //   const z = plane.geometry.getAttribute('position').getZ(i);
 
-  //   const xsin = Math.sin(x + elapsedTime);
+  //   const xsin = Math.sin(x);
 
-  //   plane.geometry.getAttribute('position').setZ(i, xsin);
+  //     plane.geometry.getAttribute('position').setZ(i, xsin);
   // }
 
   plane.geometry.computeVertexNormals();
