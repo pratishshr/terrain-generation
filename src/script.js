@@ -16,8 +16,6 @@ const canvas = document.querySelector('canvas.webgl');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
 
-const material = new THREE.MeshStandardMaterial();
-
 // gui.add(material, 'aoMapIntensity').min(0).max(10).step(0.0001);
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -79,10 +77,19 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
+const textureLoader = new THREE.TextureLoader();
+const disMap = textureLoader.load('/textures/template.jpg');
+
+const material = new THREE.MeshStandardMaterial({
+  displacementMap: disMap,
+  displacementScale: 1,
+  side: THREE.DoubleSide
+});
+
 material.wireframe = true;
 gui.add(material, 'wireframe');
 
-const planeGeometry = new THREE.PlaneGeometry(30, 30, 100, 100);
+const planeGeometry = new THREE.PlaneGeometry(30, 30, 256, 256);
 
 const plane = new THREE.Mesh(planeGeometry, material);
 plane.rotation.x = -Math.PI / 2;
@@ -92,11 +99,11 @@ plane.castShadow = true;
 // ---------
 const count = plane.geometry.getAttribute('position').count;
 
-console.log(count);
 for (let i = 0; i <= count; i++) {
-  const x = plane.geometry.getAttribute('position').getX(i);
-  const y = plane.geometry.getAttribute('position').getY(i);
-  const z = plane.geometry.getAttribute('position').getZ(i);
+  const position = plane.geometry.getAttribute('position');
+  const x = position.getX(i);
+  const y = position.getY(i);
+  const z = position.getZ(i);
 }
 // ---------
 
@@ -108,36 +115,36 @@ scene.add(plane);
  */
 const clock = new THREE.Clock();
 
-  // DIRECTIONAL LIGHT
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0)
-  directionalLight.position.x += 20
-  directionalLight.position.y += 20
-  directionalLight.position.z += 20
-  directionalLight.castShadow = true
-  directionalLight.shadow.mapSize.width = 4096;
-  directionalLight.shadow.mapSize.height = 4096;
- 
-  const d = 25;
-  directionalLight.shadow.camera.left = - d;
-  directionalLight.shadow.camera.right = d;
-  directionalLight.shadow.camera.top = d;
-  directionalLight.shadow.camera.bottom = - d;
-  directionalLight.position.z = -30;
+// DIRECTIONAL LIGHT
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+directionalLight.position.x += 20;
+directionalLight.position.y += 20;
+directionalLight.position.z += 20;
+directionalLight.castShadow = true;
+directionalLight.shadow.mapSize.width = 4096;
+directionalLight.shadow.mapSize.height = 4096;
 
-scene.add( directionalLight );
+const d = 25;
+directionalLight.shadow.camera.left = -d;
+directionalLight.shadow.camera.right = d;
+directionalLight.shadow.camera.top = d;
+directionalLight.shadow.camera.bottom = -d;
+directionalLight.position.z = -30;
+
+scene.add(directionalLight);
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  for (let i = 0; i <= count; i++) {
-    const x = plane.geometry.getAttribute('position').getX(i);
-    const y = plane.geometry.getAttribute('position').getY(i);
-    const z = plane.geometry.getAttribute('position').getZ(i);
+  // for (let i = 0; i <= count; i++) {
+  //   const x = plane.geometry.getAttribute('position').getX(i);
+  //   const y = plane.geometry.getAttribute('position').getY(i);
+  //   const z = plane.geometry.getAttribute('position').getZ(i);
 
-    const xsin = Math.sin(x + elapsedTime);
+  //   const xsin = Math.sin(x + elapsedTime);
 
-    plane.geometry.getAttribute('position').setZ(i, xsin);
-  }
+  //   plane.geometry.getAttribute('position').setZ(i, xsin);
+  // }
 
   plane.geometry.computeVertexNormals();
   plane.geometry.getAttribute('position').needsUpdate = true;
