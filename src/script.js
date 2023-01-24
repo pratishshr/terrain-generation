@@ -3,23 +3,19 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import GUI from 'lil-gui';
 import { noise } from 'perlin';
+import { generateNoiseMap } from './noise';
+import { getRGB } from './utils/color';
+import { getImageData } from './utils/canvas';
 
-noise.seed(Math.random());
-
-//Debug UI
+// Debug UI
 const gui = new GUI();
 
-/**
- * Base
- */
 // Canvas
 const canvas = document.querySelector('canvas.webgl');
 
 // Scene
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000);
-
-// gui.add(material, 'aoMapIntensity').min(0).max(10).step(0.0001);
+scene.background = new THREE.Color('black');
 
 /**
  * Sizes
@@ -43,11 +39,7 @@ window.addEventListener('resize', () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
-/**
- * Camera
- */
-
-// Base camera
+/** Camera **/
 const fov = 60;
 const aspect = sizes.width / sizes.height;
 const near = 1;
@@ -57,8 +49,9 @@ const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 camera.position.set(30, 30.5, 30.4);
 
 scene.add(camera);
+/** ----- **/
 
-/** LIGHTS */
+/** LIGHTS **/
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 
@@ -66,35 +59,22 @@ const directionalLight = new THREE.DirectionalLight(0x433f40, 1);
 directionalLight.position.set(10, 10, 1);
 
 scene.add(directionalLight);
+/** ------ */
 
-// Helpers
-// const directionalLightHelper = new THREE.DirectionalLightHelper(
-//   directionalLight,
-//   0.2
-// );
-// scene.add(directionalLightHelper);
-
-// Controls
+/** Controls **/
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
+/** -------- **/
 
-/**
- * Renderer
- */
+/** Renderer **/
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+/** ------ **/
 
-const textureLoader = new THREE.TextureLoader();
-
-const sliders = {
-  heightMap: 'none',
-};
-
-// const disMap = textureLoader.setPath('/textures/').load(sliders.heightMap);
-
+/** Mesh **/
 const material = new THREE.MeshLambertMaterial({
   side: THREE.DoubleSide,
 });
@@ -102,76 +82,100 @@ const material = new THREE.MeshLambertMaterial({
 material.wireframe = false;
 gui.add(material, 'wireframe');
 
-const planeGeometry = new THREE.PlaneGeometry(50, 50, 256, 256);
+const mapSize = {
+  width: 50,
+  height: 50,
+  widthSegments: 128,
+  heightSegments: 128,
+};
 
-// const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
-// const sphereMaterial = new THREE.MeshStandardMaterial();
+const mapWidth = 128;
+const mapHeight = 128;
+const noiseScale = 2;
 
-// const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
-// sphereMesh.position.setY(5);
-// scene.add(sphereMesh);
+const planeGeometry = new THREE.PlaneGeometry(
+  mapSize.width,
+  mapSize.height,
+  mapSize.widthSegments,
+  mapSize.heightSegments
+);
 
 const plane = new THREE.Mesh(planeGeometry, material);
 plane.rotation.x = -Math.PI / 2;
 plane.receiveShadow = true;
 plane.castShadow = true;
+scene.add(plane);
+/** ------ **/
 
-// gui
-//   .add(material, 'displacementScale')
-//   .min(0)
-//   .max(10)
-//   .step(0.0001)
-//   .onChange(() => {
-//     plane.geometry.computeVertexNormals();
-//   });
-
-// gui
-//   .add(sliders, 'heightMap')
-//   .options(['none', 'perlin-noise.png', 'hello.jpg'])
-//   .onChange((value) => {
-//     material.displacementMap = textureLoader.setPath('/textures/').load(value);
-
-//     plane.geometry.computeVertexNormals();
-//   });
-
-// ---------
+/** Algorithm **/
 const count = plane.geometry.getAttribute('position').count;
+
 const config = {
   peak: 0,
   smoothing: 1,
 };
 
-function compute(peak, smoothing) {
-  for (let i = 0; i < count; i++) {
-    const position = plane.geometry.getAttribute('position');
-    const x = position.getX(i);
-    const y = position.getY(i);
-    const z = position.getZ(i);
+function computeNoiseMap(peak, smoothing, noiseMap) {
+  let i = 0;
+  const position = plane.geometry.getAttribute('position');
 
-
-    position.setZ(
-      i,
-      peak * Math.abs(noise.simplex2(x / smoothing, y / smoothing))
-    );
+  for (let y = 0; y <= mapHeight; y++) {
+    for (let x = 0; x <= mapWidth; x++) {
+      position.setZ(i, peak * Math.abs(noiseMap[x][y]));
+      i++;
+    }
   }
+
+  // for (let i = 0; i < count; i++) {
+  //   const position = plane.geometry.getAttribute('position');
+  //   const x = position.getX(i);
+  //   const y = position.getY(i);
+  //   const z = position.getZ(i);
+
+  //   console.log(x, y)
+  //   // position.setZ(i, peak * Math.abs(noiseMap[x][y]));
+  // }
 }
 
-compute(config.peak, config.smoothing);
-
 gui.add(config, 'peak', 0, 10, 0.01).onChange((value) => {
-  compute(value, config.smoothing);
+  computeNoiseMap(value, config.smoothing, noiseMap);
 });
 
 gui.add(config, 'smoothing', 1, 10, 0.01).onChange((value) => {
-  compute(config.peak, value);
+  computeNoiseMap(config.peak, value, noiseMap);
 });
 
-
-console.log(plane.geometry.getAttribute('position'))
-// ---------
-
 camera.lookAt(plane.position);
-scene.add(plane);
+/** ------- **/
+
+/** Noise Generation */
+function drawNoiseMap(noiseMap) {
+  let colors = [];
+
+  for (let y = 0; y <= mapHeight; y++) {
+    for (let x = 0; x <= mapWidth; x++) {
+      const rgb = getRGB(noiseMap[y][x]);
+      colors.push(rgb[0], rgb[1], rgb[2]);
+    }
+  }
+
+  plane.geometry.setAttribute(
+    'color',
+    new THREE.BufferAttribute(new Float32Array(colors), 3)
+  );
+}
+
+const noiseMap = generateNoiseMap(mapWidth, mapHeight, noiseScale);
+// drawNoiseMap(noiseMap);
+// computeNoiseMap(config.peak, config.smoothing, noiseMap);
+
+const loader = new THREE.TextureLoader();
+
+loader.load('/textures/hello.jpg', (result) => {
+  getImageData(result.image);
+});
+
+/** ----- */
 
 /**
  * Animate

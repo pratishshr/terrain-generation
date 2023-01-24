@@ -17,3 +17,11 @@ body
     left: 0;
     outline: none;
 }
+
+.height-map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    border: 1px solid white;
+}
