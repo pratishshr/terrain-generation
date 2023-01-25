@@ -45,7 +45,7 @@ const near = 1;
 const far = 10000.0;
 const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 
-camera.position.set(0, 30.5, 50);
+camera.position.set(0, 50, 100);
 
 scene.add(camera);
 /** ----- **/
@@ -91,23 +91,50 @@ const mapSize = {
 const sliders = {
   heightMap: 'none',
   frequency: 1,
+  noiseScale: 2,
 };
 
-gui.add(sliders, 'frequency', 1, 200, 0.01).onChange((value) => {
+function regenerate(
+  mapWidth,
+  mapHeight,
+  widthSegments,
+  heightSegments,
+  noiseScale
+) {
   const plane = regenerateBoxGeometry(
-    mapSize.width,
-    mapSize.height,
-    value,
-    value
+    mapWidth,
+    mapHeight,
+    widthSegments,
+    heightSegments
   );
 
-  const noiseMap = generateNoiseMap(value + 1, value + 1, noiseScale);
-  const imageData = generateNoiseImage(noiseMap, value + 1, value + 1);
+  const noiseMap = generateNoiseMap(
+    widthSegments + 1,
+    heightSegments + 1,
+    noiseScale
+  );
+  const imageData = generateNoiseImage(
+    noiseMap,
+    widthSegments + 1,
+    heightSegments + 1
+  );
 
   setHeightFromImageData(imageData, plane);
+}
+
+gui.add(sliders, 'frequency', 1, 200, 0.01).onChange((value) => {
+  regenerate(mapSize.width, mapSize.height, value, value, sliders.noiseScale);
 });
 
-const noiseScale = 4;
+gui.add(sliders, 'noiseScale', 1, 10, 0.01).onChange((value) => {
+  regenerate(
+    mapSize.width,
+    mapSize.height,
+    sliders.frequency,
+    sliders.frequency,
+    value
+  );
+});
 
 let planeGeometry;
 let plane;
@@ -235,7 +262,7 @@ gui
 const noiseMap = generateNoiseMap(
   mapSize.widthSegments + 1,
   mapSize.heightSegments + 1,
-  noiseScale
+  sliders.noiseScale
 );
 
 const imageData = generateNoiseImage(
