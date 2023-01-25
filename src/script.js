@@ -89,9 +89,17 @@ const mapSize = {
 };
 
 const sliders = {
+  seed: 1,
   heightMap: 'none',
-  frequency: 1,
-  noiseScale: 2,
+  frequency: 100,
+  noiseScale: 20,
+  octaves: 4,
+  persistance: 0.5,
+  lacunarity: 2,
+  offset: {
+    x: 0,
+    y: 0,
+  },
 };
 
 function regenerate(
@@ -99,7 +107,12 @@ function regenerate(
   mapHeight,
   widthSegments,
   heightSegments,
-  noiseScale
+  noiseScale,
+  octaves,
+  persistance,
+  lacunarity,
+  offset,
+  seed
 ) {
   const plane = regenerateBoxGeometry(
     mapWidth,
@@ -111,7 +124,12 @@ function regenerate(
   const noiseMap = generateNoiseMap(
     widthSegments + 1,
     heightSegments + 1,
-    noiseScale
+    noiseScale,
+    octaves,
+    persistance,
+    lacunarity,
+    offset,
+    seed
   );
   const imageData = generateNoiseImage(
     noiseMap,
@@ -123,18 +141,131 @@ function regenerate(
 }
 
 gui.add(sliders, 'frequency', 1, 200, 0.01).onChange((value) => {
-  regenerate(mapSize.width, mapSize.height, value, value, sliders.noiseScale);
+  regenerate(
+    mapSize.width,
+    mapSize.height,
+    value,
+    value,
+    sliders.noiseScale,
+    sliders.octaves,
+    sliders.persistance,
+    sliders.lacunarity,
+    sliders.offset,
+    sliders.seed
+  );
 });
 
-gui.add(sliders, 'noiseScale', 1, 10, 0.01).onChange((value) => {
+gui.add(sliders, 'noiseScale', 1, 100, 0.01).onChange((value) => {
   regenerate(
     mapSize.width,
     mapSize.height,
     sliders.frequency,
     sliders.frequency,
+    value,
+    sliders.octaves,
+    sliders.persistance,
+    sliders.lacunarity,
+    sliders.offset,
+    sliders.seed
+  );
+});
+
+gui.add(sliders, 'octaves', 1, 10, 1).onChange((value) => {
+  regenerate(
+    mapSize.width,
+    mapSize.height,
+    sliders.frequency,
+    sliders.frequency,
+    sliders.noiseScale,
+    value,
+    sliders.persistance,
+    sliders.lacunarity,
+    sliders.offset,
+    sliders.seed
+  );
+});
+
+gui.add(sliders, 'persistance', 0.1, 1, 0.01).onChange((value) => {
+  regenerate(
+    mapSize.width,
+    mapSize.height,
+    sliders.frequency,
+    sliders.frequency,
+    sliders.noiseScale,
+    sliders.octaves,
+    value,
+    sliders.lacunarity,
+    sliders.offset,
+    sliders.seed
+  );
+});
+
+gui.add(sliders, 'lacunarity', 1, 10, 0.01).onChange((value) => {
+  regenerate(
+    mapSize.width,
+    mapSize.height,
+    sliders.frequency,
+    sliders.frequency,
+    sliders.noiseScale,
+    sliders.octaves,
+    sliders.persistance,
+    value,
+    sliders.offset,
+    sliders.seed
+  );
+});
+
+gui.add(sliders, 'seed', 1, 1000, 1).onChange((value) => {
+  regenerate(
+    mapSize.width,
+    mapSize.height,
+    sliders.frequency,
+    sliders.frequency,
+    sliders.noiseScale,
+    sliders.octaves,
+    sliders.persistance,
+    sliders.lacunarity,
+    sliders.offset,
     value
   );
 });
+
+gui.add(sliders.offset, 'x', 0, 10, 0.1).onChange((value) => {
+  regenerate(
+    mapSize.width,
+    mapSize.height,
+    sliders.frequency,
+    sliders.frequency,
+    sliders.noiseScale,
+    sliders.octaves,
+    sliders.persistance,
+    sliders.lacunarity,
+    {
+      x: value,
+      y: sliders.offset.y,
+    },
+    sliders.seed
+  );
+});
+
+gui.add(sliders.offset, 'y', 0, 10, 0.1).onChange((value) => {
+  regenerate(
+    mapSize.width,
+    mapSize.height,
+    sliders.frequency,
+    sliders.frequency,
+    sliders.noiseScale,
+    sliders.octaves,
+    sliders.persistance,
+    sliders.lacunarity,
+    {
+      x: sliders.offset.x,
+      y: value,
+    },
+    sliders.seed
+  );
+});
+
 
 let planeGeometry;
 let plane;
@@ -235,7 +366,7 @@ function setHeightFromImageData(imageData, plane) {
   const count = plane.geometry.getAttribute('position').count;
 
   for (let i = 0; i < count; i++) {
-    position.setZ(i, imageData[i] * 10);
+    position.setZ(i, imageData[i] * 20);
   }
 }
 
@@ -259,19 +390,18 @@ gui
     plane.geometry.computeVertexNormals();
   });
 
-const noiseMap = generateNoiseMap(
-  mapSize.widthSegments + 1,
-  mapSize.heightSegments + 1,
-  sliders.noiseScale
+regenerate(
+  mapSize.width,
+  mapSize.height,
+  sliders.frequency,
+  sliders.frequency,
+  sliders.noiseScale,
+  sliders.octaves,
+  sliders.persistance,
+  sliders.lacunarity,
+  sliders.offset,
+  sliders.seed
 );
-
-const imageData = generateNoiseImage(
-  noiseMap,
-  mapSize.widthSegments + 1,
-  mapSize.heightSegments + 1
-);
-
-setHeightFromImageData(imageData, plane);
 
 /** ----- */
 
