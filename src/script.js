@@ -150,6 +150,7 @@ function regenerate({
     maxSegments + 1,
     maxSegments + 1
   );
+
   fillTerrainWithColor(colorMap, plane);
 
   setHeightFromImageData(
@@ -205,7 +206,7 @@ gui.add(sliders, 'elevation', 0, 40, 1).onChange((value) => {
   regenerate({ ...sliders, elevation: value });
 });
 
-gui.add(sliders, 'levelOfDetail', 0, 6, 1).onChange((value) => {
+gui.add(sliders, 'levelOfDetail', 0, 3, 1).onChange((value) => {
   regenerate({ ...sliders, levelOfDetail: value });
 });
 
@@ -347,10 +348,25 @@ function setHeightFromImageData(
 
   console.log(meshSimplificationIncrement, segmentsPerLine);
 
-  for (let i = 0; i < count; i++) {
-    let easingHeight = easing(imageData[i]);
+  // for (let i = 0; i < count; i++) {
+  //   let easingHeight = easing(imageData[i]);
 
-    position.setZ(i, easingHeight * elevation);
+  //   position.setZ(i, easingHeight * elevation);
+  // }
+
+  const heights = [];
+
+  for (let y = 0; y < maxSegments; y += meshSimplificationIncrement) {
+    for (let x = 0; x < maxSegments; x += meshSimplificationIncrement) {
+      let index = y * maxSegments + x;
+      let easingHeight = easing(imageData[index]);
+
+      heights.push(easingHeight * elevation);
+    }
+  }
+
+  for (let i = 0; i < count; i++) {
+    position.setZ(i, heights[i]);
   }
 }
 
@@ -367,8 +383,8 @@ const count = plane.geometry.getAttribute('position').count;
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  // plane.geometry.computeVertexNormals();
-  // plane.geometry.getAttribute('position').needsUpdate = true;
+  plane.geometry.computeVertexNormals();
+  plane.geometry.getAttribute('position').needsUpdate = true;
 
   // Update controls
   controls.update();
