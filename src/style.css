@@ -27,3 +27,13 @@ body
     width: 256px;
     height: 256px
 }
+
+.color-map {
+    position: absolute;
+    top: 256px;
+    left: 0;
+    z-index: 999;
+    border: 1px solid white;
+    width: 256px;
+    height: 256px
+}

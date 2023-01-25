@@ -3,7 +3,12 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import GUI from 'lil-gui';
 
-import { destroy, generateNoiseImage, getImageData } from './utils/canvas';
+import {
+  destroy,
+  generateColorImage,
+  generateNoiseImage,
+  getImageData,
+} from './utils/canvas';
 import { generateNoiseMap } from './utils/noise';
 
 // Debug UI
@@ -76,6 +81,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 /** Mesh **/
 const material = new THREE.MeshLambertMaterial({
   side: THREE.DoubleSide,
+  color: '#936b5d',
 });
 
 material.wireframe = false;
@@ -131,16 +137,19 @@ function regenerate(
     offset,
     seed
   );
+
   const imageData = generateNoiseImage(
     noiseMap,
     widthSegments + 1,
     heightSegments + 1
   );
 
+  generateColorImage(noiseMap, widthSegments + 1, heightSegments + 1);
+
   setHeightFromImageData(imageData, plane);
 }
 
-gui.add(sliders, 'frequency', 1, 200, 0.01).onChange((value) => {
+gui.add(sliders, 'frequency', 1, 200, 1).onChange((value) => {
   regenerate(
     mapSize.width,
     mapSize.height,
@@ -265,7 +274,6 @@ gui.add(sliders.offset, 'y', 0, 10, 0.1).onChange((value) => {
     sliders.seed
   );
 });
-
 
 let planeGeometry;
 let plane;
