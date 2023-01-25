@@ -97,19 +97,7 @@ export function generateColorImage(noiseMap, width, height) {
   canvas.className = 'color-map';
   document.body.appendChild(canvas);
 
-  const imageData = context.getImageData(0, 0, width, height);
-
-  const heightData = [];
-
-  for (let i = 0; i < imageData.data.length; i += 4) {
-    let r = imageData.data[i];
-    let g = imageData.data[i + 1];
-    let b = imageData.data[i + 2];
-
-    heightData.push(getValueFromRGB([r, g, b]));
-  }
-
-  return heightData;
+  return colorMap;
 }
 
 export function getImageData(image) {

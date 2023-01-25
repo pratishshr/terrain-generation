@@ -10,6 +10,7 @@ import {
   getImageData,
 } from './utils/canvas';
 import { generateNoiseMap } from './utils/noise';
+import { hexToRgb } from './utils/color';
 
 // Debug UI
 const gui = new GUI();
@@ -81,15 +82,15 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 /** Mesh **/
 const material = new THREE.MeshLambertMaterial({
   side: THREE.DoubleSide,
-  color: '#936b5d',
+  vertexColors: true,
 });
 
 material.wireframe = false;
 gui.add(material, 'wireframe');
 
 const mapSize = {
-  width: 100,
-  height: 100,
+  width: 128,
+  height: 128,
   widthSegments: 1,
   heightSegments: 1,
 };
@@ -144,7 +145,12 @@ function regenerate(
     heightSegments + 1
   );
 
-  generateColorImage(noiseMap, widthSegments + 1, heightSegments + 1);
+  const colorMap = generateColorImage(
+    noiseMap,
+    widthSegments + 1,
+    heightSegments + 1
+  );
+  fillTerrainWithColor(colorMap, plane);
 
   setHeightFromImageData(imageData, plane);
 }
@@ -290,6 +296,23 @@ plane.rotation.x = -Math.PI / 2;
 // plane.receiveShadow = true;
 // plane.castShadow = true;
 scene.add(plane);
+
+function fillTerrainWithColor(colorMap, plane) {
+  const count = plane.geometry.getAttribute('position').count;
+
+  plane.geometry.setAttribute(
+    'color',
+    new THREE.BufferAttribute(new Float32Array(count * 3), 3)
+  );
+
+  const colors = plane.geometry.getAttribute('color');
+
+  for (let i = 0; i < count; i++) {
+    const rgb = hexToRgb(colorMap[i]);
+
+    colors.setXYZ(i, rgb.r / 255, rgb.g / 255, rgb.b / 255);
+  }
+}
 
 function regenerateBoxGeometry(width, height, widthSegments, heightSegments) {
   planeGeometry = new THREE.PlaneGeometry(
