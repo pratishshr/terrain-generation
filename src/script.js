@@ -78,6 +78,7 @@ controls.enableDamping = true;
 /** Renderer **/
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
+  antialias: true
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -92,14 +93,14 @@ const material = new THREE.MeshStandardMaterial({
 material.wireframe = false;
 gui.add(material, 'wireframe');
 
-const maxSegments = 240;
+const maxSegments = 239;
 
 const sliders = {
-  width: 129,
-  height: 129,
+  width: 100,
+  height: 100,
   seed: 1,
   levelOfDetail: 0,
-  noiseScale: 20,
+  noiseScale: 70,
   octaves: 4,
   persistance: 0.5,
   lacunarity: 2,
@@ -107,7 +108,7 @@ const sliders = {
     x: 0,
     y: 0,
   },
-  elevation: 6,
+  elevation: 18,
 };
 
 function regenerate({
@@ -165,28 +166,74 @@ function regenerate({
   );
 }
 
+function update({
+  noiseScale,
+  octaves,
+  persistance,
+  lacunarity,
+  offset,
+  seed,
+  elevation,
+  levelOfDetail,
+}) {
+  const noiseMap = generateNoiseMap(
+    maxSegments + 1,
+    maxSegments + 1,
+    noiseScale,
+    octaves,
+    persistance,
+    lacunarity,
+    offset,
+    seed
+  );
+
+  const imageData = generateNoiseImage(
+    noiseMap,
+    maxSegments + 1,
+    maxSegments + 1
+  );
+
+  const colorMap = generateColorImage(
+    noiseMap,
+    maxSegments + 1,
+    maxSegments + 1,
+    maxSegments,
+    levelOfDetail
+  );
+
+  fillTerrainWithColor(colorMap, plane);
+
+  setHeightFromImageData(
+    imageData,
+    plane,
+    elevation,
+    maxSegments,
+    levelOfDetail
+  );
+}
+
 gui.add(sliders, 'noiseScale', 1, 100, 0.01).onChange((value) => {
-  regenerate({ ...sliders, noiseScale: value });
+  update({ ...sliders, noiseScale: value });
 });
 
 gui.add(sliders, 'octaves', 1, 10, 1).onChange((value) => {
-  regenerate({ ...sliders, octaves: value });
+  update({ ...sliders, octaves: value });
 });
 
 gui.add(sliders, 'persistance', 0.1, 1, 0.01).onChange((value) => {
-  regenerate({ ...sliders, persistance: value });
+  update({ ...sliders, persistance: value });
 });
 
 gui.add(sliders, 'lacunarity', 1, 10, 0.01).onChange((value) => {
-  regenerate({ ...sliders, lacunarity: value });
+  update({ ...sliders, lacunarity: value });
 });
 
 gui.add(sliders, 'seed', 1, 1000, 1).onChange((value) => {
-  regenerate({ ...sliders, seed: value });
+  update({ ...sliders, seed: value });
 });
 
 gui.add(sliders.offset, 'x', 0, 10, 0.1).onChange((value) => {
-  regenerate({
+  update({
     ...sliders,
     offset: {
       ...sliders.offset,
@@ -196,7 +243,7 @@ gui.add(sliders.offset, 'x', 0, 10, 0.1).onChange((value) => {
 });
 
 gui.add(sliders.offset, 'y', 0, 10, 0.1).onChange((value) => {
-  regenerate({
+  update({
     ...sliders,
     offset: {
       ...sliders.offset,
@@ -206,7 +253,7 @@ gui.add(sliders.offset, 'y', 0, 10, 0.1).onChange((value) => {
 });
 
 gui.add(sliders, 'elevation', 0, 40, 1).onChange((value) => {
-  regenerate({ ...sliders, elevation: value });
+  update({ ...sliders, elevation: value });
 });
 
 gui.add(sliders, 'levelOfDetail', 0, 3, 1).onChange((value) => {
@@ -374,7 +421,6 @@ const count = plane.geometry.getAttribute('position').count;
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  plane.geometry.computeVertexNormals();
   plane.geometry.getAttribute('position').needsUpdate = true;
 
   // Update controls
