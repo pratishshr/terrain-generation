@@ -13,6 +13,7 @@ import {
 import { generateNoiseMap } from './utils/noise';
 import { hexToRgb } from './utils/color';
 import { CubicBezierCurve } from 'three';
+import { getSegmentsPerLine } from './utils/calculations';
 
 // Debug UI
 const gui = new GUI();
@@ -148,7 +149,9 @@ function regenerate({
   const colorMap = generateColorImage(
     noiseMap,
     maxSegments + 1,
-    maxSegments + 1
+    maxSegments + 1,
+    maxSegments,
+    levelOfDetail
   );
 
   fillTerrainWithColor(colorMap, plane);
@@ -241,18 +244,6 @@ function fillTerrainWithColor(colorMap, plane) {
 
     colors.setXYZ(i, rgb.r / 255, rgb.g / 255, rgb.b / 255);
   }
-}
-
-function getSegmentsPerLine(maxSegments, levelOfDetail) {
-  let meshSimplificationIncrement = levelOfDetail * 2;
-
-  if (meshSimplificationIncrement == 0) {
-    meshSimplificationIncrement = 1;
-  }
-
-  const segmentsPerLine = maxSegments / meshSimplificationIncrement;
-
-  return { meshSimplificationIncrement, segmentsPerLine };
 }
 
 function regenerateBoxGeometry(width, height, maxSegments, levelOfDetail) {

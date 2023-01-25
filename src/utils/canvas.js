@@ -1,3 +1,4 @@
+import { getSegmentsPerLine } from './calculations';
 import { getRGB, getValueFromRGB } from './color';
 import * as math from './math';
 
@@ -40,12 +41,16 @@ export function generateNoiseImage(noiseMap, width, height) {
     heightData.push(getValueFromRGB([r, g, b]));
   }
 
-  
-
   return heightData;
 }
 
-export function generateColorImage(noiseMap, width, height) {
+export function generateColorImage(
+  noiseMap,
+  width,
+  height,
+  maxSegments,
+  levelOfDetail
+) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -78,15 +83,20 @@ export function generateColorImage(noiseMap, width, height) {
     { height: 0.85, color: '#41302d', name: 'rock2' },
     { height: 1, color: '#c7c7c7', name: 'snow' },
   ];
-  const colorMap = new Array(width * height);
+  const colorMap = [];
 
-  for (let x = 0; x < canvas.width; x++) {
-    for (let y = 0; y < canvas.height; y++) {
+  const { meshSimplificationIncrement, segmentsPerLine } = getSegmentsPerLine(
+    maxSegments,
+    levelOfDetail
+  );
+
+  for (let y = 0; y < canvas.width; y += meshSimplificationIncrement) {
+    for (let x = 0; x < canvas.height; x += meshSimplificationIncrement) {
       let value = noiseMap[x][y];
 
       for (let i = 0; i < regions.length; i++) {
         if (value <= regions[i].height) {
-          colorMap[y * canvas.width + x] = regions[i].color;
+          colorMap.push(regions[i].color);
           context.fillStyle = regions[i].color;
           context.fillRect(x, y, 1, 1);
 
