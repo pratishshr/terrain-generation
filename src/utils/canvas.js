@@ -40,6 +40,8 @@ export function generateNoiseImage(noiseMap, width, height) {
     heightData.push(getValueFromRGB([r, g, b]));
   }
 
+  
+
   return heightData;
 }
 
@@ -73,7 +75,7 @@ export function generateColorImage(noiseMap, width, height) {
     },
     { height: 0.6, color: '#437514', name: 'grass2' },
     { height: 0.7, color: '#544038', name: 'rock' },
-    { height: 0.9, color: '#41302d', name: 'rock2' },
+    { height: 0.85, color: '#41302d', name: 'rock2' },
     { height: 1, color: '#c7c7c7', name: 'snow' },
   ];
   const colorMap = new Array(width * height);

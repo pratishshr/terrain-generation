@@ -63,9 +63,10 @@ const ambientLight = new THREE.AmbientLight(0xffffff, 1);
 scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0x433f40, 1);
-directionalLight.position.set(10, 10, 1);
+directionalLight.position.set(50, 50, 1);
 
 scene.add(directionalLight);
+
 /** ------ */
 
 /** Controls **/
@@ -82,7 +83,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 /** ------ **/
 
 /** Mesh **/
-const material = new THREE.MeshLambertMaterial({
+const material = new THREE.MeshStandardMaterial({
   side: THREE.DoubleSide,
   vertexColors: true,
 });
@@ -90,16 +91,13 @@ const material = new THREE.MeshLambertMaterial({
 material.wireframe = false;
 gui.add(material, 'wireframe');
 
-const mapSize = {
-  width: 128,
-  height: 128,
-  widthSegments: 1,
-  heightSegments: 1,
-};
+const maxSegments = 240;
 
 const sliders = {
+  width: 129,
+  height: 129,
   seed: 1,
-  frequency: 100,
+  levelOfDetail: 0,
   noiseScale: 20,
   octaves: 4,
   persistance: 0.5,
@@ -108,32 +106,31 @@ const sliders = {
     x: 0,
     y: 0,
   },
-  height: 15,
+  elevation: 6,
 };
 
-function regenerate(
-  mapWidth,
-  mapHeight,
-  widthSegments,
-  heightSegments,
+function regenerate({
+  width,
+  height,
   noiseScale,
   octaves,
   persistance,
   lacunarity,
   offset,
   seed,
-  height
-) {
+  elevation,
+  levelOfDetail,
+}) {
   const plane = regenerateBoxGeometry(
-    mapWidth,
-    mapHeight,
-    widthSegments,
-    heightSegments
+    width,
+    height,
+    maxSegments,
+    levelOfDetail
   );
 
   const noiseMap = generateNoiseMap(
-    widthSegments + 1,
-    heightSegments + 1,
+    maxSegments + 1,
+    maxSegments + 1,
     noiseScale,
     octaves,
     persistance,
@@ -144,184 +141,88 @@ function regenerate(
 
   const imageData = generateNoiseImage(
     noiseMap,
-    widthSegments + 1,
-    heightSegments + 1
+    maxSegments + 1,
+    maxSegments + 1
   );
 
   const colorMap = generateColorImage(
     noiseMap,
-    widthSegments + 1,
-    heightSegments + 1
+    maxSegments + 1,
+    maxSegments + 1
   );
   fillTerrainWithColor(colorMap, plane);
 
-  setHeightFromImageData(imageData, plane, height);
+  setHeightFromImageData(
+    imageData,
+    plane,
+    elevation,
+    maxSegments,
+    levelOfDetail
+  );
 }
 
-gui.add(sliders, 'frequency', 1, 200, 1).onChange((value) => {
-  regenerate(
-    mapSize.width,
-    mapSize.height,
-    value,
-    value,
-    sliders.noiseScale,
-    sliders.octaves,
-    sliders.persistance,
-    sliders.lacunarity,
-    sliders.offset,
-    sliders.seed,
-    sliders.height
-  );
-});
-
 gui.add(sliders, 'noiseScale', 1, 100, 0.01).onChange((value) => {
-  regenerate(
-    mapSize.width,
-    mapSize.height,
-    sliders.frequency,
-    sliders.frequency,
-    value,
-    sliders.octaves,
-    sliders.persistance,
-    sliders.lacunarity,
-    sliders.offset,
-    sliders.seed,
-    sliders.height
-  );
+  regenerate({ ...sliders, noiseScale: value });
 });
 
 gui.add(sliders, 'octaves', 1, 10, 1).onChange((value) => {
-  regenerate(
-    mapSize.width,
-    mapSize.height,
-    sliders.frequency,
-    sliders.frequency,
-    sliders.noiseScale,
-    value,
-    sliders.persistance,
-    sliders.lacunarity,
-    sliders.offset,
-    sliders.seed,
-    sliders.height
-  );
+  regenerate({ ...sliders, octaves: value });
 });
 
 gui.add(sliders, 'persistance', 0.1, 1, 0.01).onChange((value) => {
-  regenerate(
-    mapSize.width,
-    mapSize.height,
-    sliders.frequency,
-    sliders.frequency,
-    sliders.noiseScale,
-    sliders.octaves,
-    value,
-    sliders.lacunarity,
-    sliders.offset,
-    sliders.seed,
-    sliders.height
-  );
+  regenerate({ ...sliders, persistance: value });
 });
 
 gui.add(sliders, 'lacunarity', 1, 10, 0.01).onChange((value) => {
-  regenerate(
-    mapSize.width,
-    mapSize.height,
-    sliders.frequency,
-    sliders.frequency,
-    sliders.noiseScale,
-    sliders.octaves,
-    sliders.persistance,
-    value,
-    sliders.offset,
-    sliders.seed,
-    sliders.height
-  );
+  regenerate({ ...sliders, lacunarity: value });
 });
 
 gui.add(sliders, 'seed', 1, 1000, 1).onChange((value) => {
-  regenerate(
-    mapSize.width,
-    mapSize.height,
-    sliders.frequency,
-    sliders.frequency,
-    sliders.noiseScale,
-    sliders.octaves,
-    sliders.persistance,
-    sliders.lacunarity,
-    sliders.offset,
-    value,
-    sliders.height
-  );
+  regenerate({ ...sliders, seed: value });
 });
 
 gui.add(sliders.offset, 'x', 0, 10, 0.1).onChange((value) => {
-  regenerate(
-    mapSize.width,
-    mapSize.height,
-    sliders.frequency,
-    sliders.frequency,
-    sliders.noiseScale,
-    sliders.octaves,
-    sliders.persistance,
-    sliders.lacunarity,
-    {
+  regenerate({
+    ...sliders,
+    offset: {
+      ...sliders.offset,
       x: value,
-      y: sliders.offset.y,
     },
-    sliders.seed,
-    sliders.height
-  );
+  });
 });
 
 gui.add(sliders.offset, 'y', 0, 10, 0.1).onChange((value) => {
-  regenerate(
-    mapSize.width,
-    mapSize.height,
-    sliders.frequency,
-    sliders.frequency,
-    sliders.noiseScale,
-    sliders.octaves,
-    sliders.persistance,
-    sliders.lacunarity,
-    {
-      x: sliders.offset.x,
+  regenerate({
+    ...sliders,
+    offset: {
+      ...sliders.offset,
       y: value,
     },
-    sliders.seed,
-    sliders.height
-  );
+  });
 });
 
-gui.add(sliders, 'height', 0, 40, 1).onChange((value) => {
-  regenerate(
-    mapSize.width,
-    mapSize.height,
-    sliders.frequency,
-    sliders.frequency,
-    sliders.noiseScale,
-    sliders.octaves,
-    sliders.persistance,
-    sliders.lacunarity,
-    sliders.offset,
-    sliders.seed,
-    value
-  );
+gui.add(sliders, 'elevation', 0, 40, 1).onChange((value) => {
+  regenerate({ ...sliders, elevation: value });
+});
+
+gui.add(sliders, 'levelOfDetail', 0, 6, 1).onChange((value) => {
+  regenerate({ ...sliders, levelOfDetail: value });
 });
 
 let planeGeometry;
 let plane;
 
 planeGeometry = new THREE.PlaneGeometry(
-  mapSize.width,
-  mapSize.height,
-  mapSize.widthSegments,
-  mapSize.heightSegments
+  sliders.width,
+  sliders.height,
+  sliders.maxSegments,
+  sliders.maxSegments
 );
 
 plane = new THREE.Mesh(planeGeometry, material);
 plane.rotation.x = -Math.PI / 2;
-// plane.receiveShadow = true;
-// plane.castShadow = true;
+plane.receiveShadow = true;
+plane.castShadow = true;
 scene.add(plane);
 
 function fillTerrainWithColor(colorMap, plane) {
@@ -341,12 +242,26 @@ function fillTerrainWithColor(colorMap, plane) {
   }
 }
 
-function regenerateBoxGeometry(width, height, widthSegments, heightSegments) {
+function getSegmentsPerLine(maxSegments, levelOfDetail) {
+  let meshSimplificationIncrement = levelOfDetail * 2;
+
+  if (meshSimplificationIncrement == 0) {
+    meshSimplificationIncrement = 1;
+  }
+
+  const segmentsPerLine = maxSegments / meshSimplificationIncrement;
+
+  return { meshSimplificationIncrement, segmentsPerLine };
+}
+
+function regenerateBoxGeometry(width, height, maxSegments, levelOfDetail) {
+  const { segmentsPerLine } = getSegmentsPerLine(maxSegments, levelOfDetail);
+
   planeGeometry = new THREE.PlaneGeometry(
     width,
     height,
-    widthSegments,
-    heightSegments
+    segmentsPerLine,
+    segmentsPerLine
   );
 
   plane.geometry.dispose();
@@ -413,32 +328,33 @@ camera.lookAt(plane.position);
 // drawNoiseMap(noiseMap);
 // computeNoiseMap(config.peak, config.smoothing, noiseMap);
 
-function setHeightFromImageData(imageData, plane, height) {
+function setHeightFromImageData(
+  imageData,
+  plane,
+  elevation,
+  maxSegments,
+  levelOfDetail
+) {
+  const { meshSimplificationIncrement, segmentsPerLine } = getSegmentsPerLine(
+    maxSegments,
+    levelOfDetail
+  );
+
   const position = plane.geometry.getAttribute('position');
   const count = plane.geometry.getAttribute('position').count;
 
   const easing = BezierEasing(0.8, 0.17, 0.46, 0.05);
-  
+
+  console.log(meshSimplificationIncrement, segmentsPerLine);
+
   for (let i = 0; i < count; i++) {
     let easingHeight = easing(imageData[i]);
 
-    position.setZ(i, easingHeight * height);
+    position.setZ(i, easingHeight * elevation);
   }
 }
 
-regenerate(
-  mapSize.width,
-  mapSize.height,
-  sliders.frequency,
-  sliders.frequency,
-  sliders.noiseScale,
-  sliders.octaves,
-  sliders.persistance,
-  sliders.lacunarity,
-  sliders.offset,
-  sliders.seed,
-  sliders.height
-);
+regenerate(sliders);
 
 /** ----- */
 
@@ -446,21 +362,13 @@ regenerate(
  * Animate
  */
 const clock = new THREE.Clock();
+const count = plane.geometry.getAttribute('position').count;
+
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  // for (let i = 0; i <= count; i++) {
-  //   const x = plane.geometry.getAttribute('position').getX(i);
-  //   const y = plane.geometry.getAttribute('position').getY(i);
-  //   const z = plane.geometry.getAttribute('position').getZ(i);
-
-  //   const xsin = Math.sin(x);
-
-  //     plane.geometry.getAttribute('position').setZ(i, xsin);
-  // }
-
-  plane.geometry.computeVertexNormals();
-  plane.geometry.getAttribute('position').needsUpdate = true;
+  // plane.geometry.computeVertexNormals();
+  // plane.geometry.getAttribute('position').needsUpdate = true;
 
   // Update controls
   controls.update();
