@@ -2,6 +2,7 @@ import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import GUI from 'lil-gui';
+import BezierEasing from 'bezier-easing';
 
 import {
   destroy,
@@ -11,6 +12,7 @@ import {
 } from './utils/canvas';
 import { generateNoiseMap } from './utils/noise';
 import { hexToRgb } from './utils/color';
+import { CubicBezierCurve } from 'three';
 
 // Debug UI
 const gui = new GUI();
@@ -57,7 +59,7 @@ scene.add(camera);
 /** ----- **/
 
 /** LIGHTS **/
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+const ambientLight = new THREE.AmbientLight(0xffffff, 1);
 scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0x433f40, 1);
@@ -97,7 +99,6 @@ const mapSize = {
 
 const sliders = {
   seed: 1,
-  heightMap: 'none',
   frequency: 100,
   noiseScale: 20,
   octaves: 4,
@@ -107,6 +108,7 @@ const sliders = {
     x: 0,
     y: 0,
   },
+  height: 15,
 };
 
 function regenerate(
@@ -119,7 +121,8 @@ function regenerate(
   persistance,
   lacunarity,
   offset,
-  seed
+  seed,
+  height
 ) {
   const plane = regenerateBoxGeometry(
     mapWidth,
@@ -152,7 +155,7 @@ function regenerate(
   );
   fillTerrainWithColor(colorMap, plane);
 
-  setHeightFromImageData(imageData, plane);
+  setHeightFromImageData(imageData, plane, height);
 }
 
 gui.add(sliders, 'frequency', 1, 200, 1).onChange((value) => {
@@ -166,7 +169,8 @@ gui.add(sliders, 'frequency', 1, 200, 1).onChange((value) => {
     sliders.persistance,
     sliders.lacunarity,
     sliders.offset,
-    sliders.seed
+    sliders.seed,
+    sliders.height
   );
 });
 
@@ -181,7 +185,8 @@ gui.add(sliders, 'noiseScale', 1, 100, 0.01).onChange((value) => {
     sliders.persistance,
     sliders.lacunarity,
     sliders.offset,
-    sliders.seed
+    sliders.seed,
+    sliders.height
   );
 });
 
@@ -196,7 +201,8 @@ gui.add(sliders, 'octaves', 1, 10, 1).onChange((value) => {
     sliders.persistance,
     sliders.lacunarity,
     sliders.offset,
-    sliders.seed
+    sliders.seed,
+    sliders.height
   );
 });
 
@@ -211,7 +217,8 @@ gui.add(sliders, 'persistance', 0.1, 1, 0.01).onChange((value) => {
     value,
     sliders.lacunarity,
     sliders.offset,
-    sliders.seed
+    sliders.seed,
+    sliders.height
   );
 });
 
@@ -226,7 +233,8 @@ gui.add(sliders, 'lacunarity', 1, 10, 0.01).onChange((value) => {
     sliders.persistance,
     value,
     sliders.offset,
-    sliders.seed
+    sliders.seed,
+    sliders.height
   );
 });
 
@@ -241,7 +249,8 @@ gui.add(sliders, 'seed', 1, 1000, 1).onChange((value) => {
     sliders.persistance,
     sliders.lacunarity,
     sliders.offset,
-    value
+    value,
+    sliders.height
   );
 });
 
@@ -259,7 +268,8 @@ gui.add(sliders.offset, 'x', 0, 10, 0.1).onChange((value) => {
       x: value,
       y: sliders.offset.y,
     },
-    sliders.seed
+    sliders.seed,
+    sliders.height
   );
 });
 
@@ -277,7 +287,24 @@ gui.add(sliders.offset, 'y', 0, 10, 0.1).onChange((value) => {
       x: sliders.offset.x,
       y: value,
     },
-    sliders.seed
+    sliders.seed,
+    sliders.height
+  );
+});
+
+gui.add(sliders, 'height', 0, 40, 1).onChange((value) => {
+  regenerate(
+    mapSize.width,
+    mapSize.height,
+    sliders.frequency,
+    sliders.frequency,
+    sliders.noiseScale,
+    sliders.octaves,
+    sliders.persistance,
+    sliders.lacunarity,
+    sliders.offset,
+    sliders.seed,
+    value
   );
 });
 
@@ -386,40 +413,18 @@ camera.lookAt(plane.position);
 // drawNoiseMap(noiseMap);
 // computeNoiseMap(config.peak, config.smoothing, noiseMap);
 
-const loader = new THREE.TextureLoader();
-
-const textureLoader = new THREE.TextureLoader();
-
-textureLoader.setPath('/textures/').load(sliders.heightMap);
-
-function setHeightFromImageData(imageData, plane) {
+function setHeightFromImageData(imageData, plane, height) {
   const position = plane.geometry.getAttribute('position');
   const count = plane.geometry.getAttribute('position').count;
 
+  const easing = BezierEasing(0.8, 0.17, 0.46, 0.05);
+  
   for (let i = 0; i < count; i++) {
-    position.setZ(i, imageData[i] * 20);
+    let easingHeight = easing(imageData[i]);
+
+    position.setZ(i, easingHeight * height);
   }
 }
-
-gui
-  .add(sliders, 'heightMap')
-  .options(['none', 'perlin-noise.png', 'hello.jpg'])
-  .onChange((value) => {
-    destroy();
-    textureLoader.setPath('/textures/').load(value, (result) => {
-      result.image.width = mapSize.widthSegments + 1;
-      result.image.height = mapSize.heightSegments + 1;
-
-      const imageData = getImageData(
-        result.image,
-        mapSize.widthSegments + 1,
-        mapSize.heightSegments + 1
-      );
-      setHeightFromImageData(imageData);
-    });
-
-    plane.geometry.computeVertexNormals();
-  });
 
 regenerate(
   mapSize.width,
@@ -431,7 +436,8 @@ regenerate(
   sliders.persistance,
   sliders.lacunarity,
   sliders.offset,
-  sliders.seed
+  sliders.seed,
+  sliders.height
 );
 
 /** ----- */
