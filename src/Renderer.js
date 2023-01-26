@@ -50,7 +50,7 @@ class Renderer {
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
 
-    this.onUpdate?.(elapsedTime)
+    this.onUpdate?.(elapsedTime);
   }
 
   _initScene() {
@@ -66,7 +66,9 @@ class Renderer {
     const far = 10000.0;
 
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    this.camera.position.set(0, 50, 100);
+    // this.camera.position.set(0, 50, 100);
+
+    this.camera.position.set(800, 500, 1000);
 
     this.addToScene(this.camera);
   }
@@ -100,6 +102,7 @@ class Renderer {
   _initControls() {
     this.controls = new OrbitControls(this.camera, this.canvas);
     this.controls.enableDamping = true;
+    this.controls.target.set(800, 0, 0);
   }
 
   _render() {

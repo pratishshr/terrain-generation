@@ -7,25 +7,38 @@ class TerrainManager {
     this.terrains = [];
   }
 
-  createTerrain() {
+  async createTerrain(i, j) {
     const terrain = new Terrain({
       offset: {
-        x: 0,
-        y: 0,
+        x: i,
+        y: j,
       },
       levelOfDetail: 1,
     });
 
     terrain.create();
 
-    this.renderer.addToScene(terrain.terrainMesh);
+    terrain.setPosition(i * terrain.width, 0, -j * terrain.width);
 
+    this.renderer.addToScene(terrain.terrainMesh);
     this.terrains.push(terrain);
+  }
+
+  generate() {
+    for (let i = 0; i < 20; i++) {
+      for (let j = 0; j < 20; j++) {
+        setTimeout(() => {
+          this.createTerrain(i, j);
+        }, 1000);
+      }
+    }
   }
 
   animate() {
     this.renderer.onUpdate = (elapsedTime) => {
-      this.terrains.forEach((terrain) => {
+      this.terrains.forEach((terrain, index) => {
+        if (index == 1) {
+        }
       });
     };
   }

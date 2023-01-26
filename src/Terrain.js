@@ -39,6 +39,15 @@ class Terrain {
     this.setTerrainColor();
     this.setElevation();
 
+    this.updateGeometry();
+  }
+
+  setPosition(x, y) {
+    this.terrainMesh.position.x = x;
+    this.terrainMesh.position.y = y;
+  }
+
+  updateGeometry() {
     this.terrainMesh.geometry.computeVertexNormals();
     this.terrainMesh.geometry.getAttribute('position').needsUpdate = true;
   }
@@ -48,7 +57,11 @@ class Terrain {
     this.generateColorMap();
     this.setTerrainColor();
     this.setElevation();
+
+    this.updateGeometry();
   }
+
+  setPosition() {}
 
   createGeometry() {
     const { segmentsPerLine } = this._getSegmentsPerLine(
@@ -71,6 +84,14 @@ class Terrain {
     this.terrainMesh.rotation.x = -Math.PI / 2;
     this.terrainMesh.receiveShadow = true;
     this.terrainMesh.castShadow = true;
+  }
+
+  getPosition() {
+    return this.terrainMesh.position;
+  }
+
+  setPosition(x, y, z) {
+    this.terrainMesh.position.set(x, y, z);
   }
 
   generateNoiseMap() {

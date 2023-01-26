@@ -11,5 +11,5 @@ const terrainManager = new TerrainManager({
 });
 
 
-terrainManager.createTerrain();
+terrainManager.generate();
 terrainManager.animate();
