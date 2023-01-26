@@ -31,9 +31,11 @@ class Terrain {
     this.colorMap = [];
   }
 
-  create() {
+  async create() {
+    await this.generateNoiseMap();
+    
     this.createGeometry();
-    this.generateNoiseMap();
+
     this.generateColorMap();
 
     this.setTerrainColor();
@@ -52,12 +54,13 @@ class Terrain {
     this.terrainMesh.geometry.getAttribute('position').needsUpdate = true;
   }
 
-  update() {
-    this.generateNoiseMap();
+  async update() {
+    await this.generateNoiseMap();
+
     this.generateColorMap();
+
     this.setTerrainColor();
     this.setElevation();
-
     this.updateGeometry();
   }
 
@@ -94,8 +97,8 @@ class Terrain {
     this.terrainMesh.position.set(x, y, z);
   }
 
-  generateNoiseMap() {
-    this.noiseMap = noise.createNoiseMap({
+  async generateNoiseMap() {
+    this.noiseMap = await noise.createNoiseMap({
       // Vertices = segments + 1
       mapWidth: this.segments + 1,
       mapHeight: this.segments + 1,

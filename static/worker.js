@@ -1,14 +1,12 @@
-import { noise } from 'perlin';
-import { inverseLerp } from 'three/src/math/MathUtils';
-
-noise.seed(1994);
+importScripts('perlin.js');
+importScripts('mathutil.js');
 
 function randomSeed(seed) {
   let x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
 }
 
-export function generateNoiseMap(
+function createNoiseMap({
   mapWidth,
   mapHeight,
   scale,
@@ -16,8 +14,8 @@ export function generateNoiseMap(
   persistance,
   lacunarity,
   offset,
-  seed
-) {
+  seed,
+}) {
   let noiseMap = [];
 
   let octaveOffsets = new Array(octaves);
@@ -52,7 +50,7 @@ export function generateNoiseMap(
           ((y - halfHeight) / scale) * frequency -
           octaveOffsets[i].y * frequency;
 
-        let perlinValue = noise.perlin2(sampleX, sampleY) * 2;
+        let perlinValue = self.noise.perlin2(sampleX, sampleY) * 2;
         noiseHeight += perlinValue * amplitude;
 
         amplitude *= persistance;
@@ -81,7 +79,7 @@ export function generateNoiseMap(
 
   for (let y = 0; y < mapHeight; y++) {
     for (let x = 0; x < mapWidth; x++) {
-      noiseMap[x][y] = inverseLerp(
+      noiseMap[x][y] = self.inverseLerp(
         minNoiseHeight,
         maxNoiseHeight,
         noiseMap[x][y]
@@ -92,32 +90,8 @@ export function generateNoiseMap(
   return noiseMap;
 }
 
-export async function createNoiseMap({
-  mapWidth,
-  mapHeight,
-  scale,
-  octaves,
-  persistance,
-  lacunarity,
-  offset,
-  seed,
-}) {
-  return new Promise((resolve) => {
-    const worker = new Worker('worker.js');
+onmessage = function (e) {
+  let noiseMap = createNoiseMap(e.data);
 
-    worker.postMessage({
-      mapWidth,
-      mapHeight,
-      scale,
-      octaves,
-      persistance,
-      lacunarity,
-      offset,
-      seed,
-    });
-
-    worker.onmessage = (e) => {
-      resolve(e.data);
-    };
-  });
-}
+  postMessage(noiseMap);
+};

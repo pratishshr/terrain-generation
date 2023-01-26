@@ -16,7 +16,7 @@ class TerrainManager {
       levelOfDetail: 1,
     });
 
-    terrain.create();
+    await terrain.create();
 
     terrain.setPosition(i * terrain.width, 0, -j * terrain.width);
 
@@ -24,12 +24,10 @@ class TerrainManager {
     this.terrains.push(terrain);
   }
 
-  generate() {
+  async generate() {
     for (let i = 0; i < 20; i++) {
       for (let j = 0; j < 20; j++) {
-        setTimeout(() => {
-          this.createTerrain(i, j);
-        }, 1000);
+          await this.createTerrain(i, j);
       }
     }
   }
