@@ -63,8 +63,21 @@ scene.add(camera);
 const ambientLight = new THREE.AmbientLight(0xffffff, 1);
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0x433f40, 1);
-directionalLight.position.set(50, 50, 1);
+// DIRECTIONAL LIGHT
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+directionalLight.position.x += 20;
+directionalLight.position.y += 20;
+directionalLight.position.z += 20;
+directionalLight.castShadow = true;
+directionalLight.shadow.mapSize.width = 4096;
+directionalLight.shadow.mapSize.height = 4096;
+directionalLight.position.z = -30;
+
+const d = 20;
+directionalLight.shadow.camera.left = -d;
+directionalLight.shadow.camera.right = d;
+directionalLight.shadow.camera.top = d;
+directionalLight.shadow.camera.bottom = -d;
 
 scene.add(directionalLight);
 
@@ -78,7 +91,6 @@ controls.enableDamping = true;
 /** Renderer **/
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
-  antialias: true
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -93,7 +105,7 @@ const material = new THREE.MeshStandardMaterial({
 material.wireframe = false;
 gui.add(material, 'wireframe');
 
-const maxSegments = 239;
+const maxSegments = 240;
 
 const sliders = {
   width: 100,
@@ -384,14 +396,6 @@ function setHeightFromImageData(
 
   const easing = BezierEasing(0.8, 0.17, 0.46, 0.05);
 
-  console.log(meshSimplificationIncrement, segmentsPerLine);
-
-  // for (let i = 0; i < count; i++) {
-  //   let easingHeight = easing(imageData[i]);
-
-  //   position.setZ(i, easingHeight * elevation);
-  // }
-
   const heights = [];
 
   for (let y = 0; y < maxSegments; y += meshSimplificationIncrement) {
@@ -421,6 +425,7 @@ const count = plane.geometry.getAttribute('position').count;
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
+  plane.geometry.computeVertexNormals();
   plane.geometry.getAttribute('position').needsUpdate = true;
 
   // Update controls
