@@ -61,28 +61,28 @@ export function generateColorImage(
   const regions = [
     {
       height: 0.3,
-      color: '#3762be',
+      color: '#4377BA',
       name: 'deep water',
     },
     {
       height: 0.4,
-      color: '#2e5cb7',
+      color: '#3E6EAC',
       name: 'shallow water',
     },
     {
-      height: 0.45,
-      color: '#cab159',
+      height: 0.48,
+      color: '#9C8130',
       name: 'sand',
     },
     {
       height: 0.55,
-      color: '#5ca61b',
+      color: '#57814E',
       name: 'grass',
     },
-    { height: 0.6, color: '#437514', name: 'grass2' },
-    { height: 0.7, color: '#544038', name: 'rock' },
-    { height: 0.85, color: '#41302d', name: 'rock2' },
-    { height: 1, color: '#c7c7c7', name: 'snow' },
+    { height: 0.6, color: '#40794D', name: 'grass2' },
+    { height: 0.7, color: '#5C4C33', name: 'rock' },
+    { height: 0.85, color: '#50422C', name: 'rock2' },
+    { height: 1, color: '#F9F8F2', name: 'snow' },
   ];
   const colorMap = [];
 

@@ -23,7 +23,7 @@ const canvas = document.querySelector('canvas.webgl');
 
 // Scene
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('black');
+scene.background = new THREE.Color('#2E2E38');
 
 /**
  * Sizes
@@ -64,7 +64,7 @@ const ambientLight = new THREE.AmbientLight(0xffffff, 1);
 scene.add(ambientLight);
 
 // DIRECTIONAL LIGHT
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.x += 20;
 directionalLight.position.y += 20;
 directionalLight.position.z += 20;
