@@ -12,7 +12,6 @@ import {
 } from './utils/canvas';
 import { generateNoiseMap } from './utils/noise';
 import { hexToRgb } from './utils/color';
-import { CubicBezierCurve } from 'three';
 import { getSegmentsPerLine } from './utils/calculations';
 
 // Debug UI
