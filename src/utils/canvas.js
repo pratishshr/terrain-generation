@@ -141,28 +141,29 @@ export function getImageData(image) {
 
 const regions = [
   {
-    height: 0.3,
+    height: 0,
     color: '#4377BA',
     name: 'deep water',
   },
   {
-    height: 0.4,
+    height: 0.05,
     color: '#3E6EAC',
     name: 'shallow water',
   },
   {
-    height: 0.48,
+  height: 0.2,
     color: '#9C8130',
     name: 'sand',
   },
   {
-    height: 0.55,
+    height: 0.3,
     color: '#57814E',
     name: 'grass',
   },
-  { height: 0.6, color: '#40794D', name: 'grass2' },
-  { height: 0.7, color: '#5C4C33', name: 'rock' },
-  { height: 0.85, color: '#50422C', name: 'rock2' },
+  { height: 0.4, color: '#40794D', name: 'grass2' },
+  { height: 0.6, color: '#5C4C33', name: 'rock' },
+  { height: 0.9, color: '#50422C', name: 'rock2' },
+  // { height: 1, color: '#50422C', name: 'rock3' },
   { height: 1, color: '#F9F8F2', name: 'snow' },
 ];
 
@@ -189,9 +190,8 @@ export function createColorMap({ noiseMap, levelOfDetail }) {
           colorMap.push(regions[i].color);
           context.fillStyle = regions[i].color;
           context.fillRect(x, y, 1, 1);
-
-          break;
-        }
+          break
+        } 
       }
     }
   }

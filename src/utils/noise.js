@@ -106,7 +106,9 @@ export async function createNoiseMap({
   seed,
 }) {
   return new Promise((resolve) => {
-    const worker = new Worker('worker.js');
+    const worker = new Worker(new URL('../workers/worker.js', import.meta.url), {
+      module: true,
+    });
 
     worker.postMessage({
       mapWidth,

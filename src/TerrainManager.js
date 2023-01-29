@@ -1,19 +1,46 @@
 import Terrain from './Terrain';
 
+import GUI from 'lil-gui';
+import { clamp } from 'three/src/math/MathUtils';
+
+// Debug UI
+const gui = new GUI();
+
 class TerrainManager {
   constructor({ renderer }) {
     this.renderer = renderer;
 
     this.terrains = [];
+    this.config = {
+      offset: {
+        x: 0,
+        y: 0,
+      },
+    };
+
+    this._initConfigGUI();
   }
 
-  async createTerrain(i, j) {
+  _initConfigGUI() {
+    gui
+      .add(this.config.offset, 'x', -500, 500, 1)
+      .onChange(async (value) => {
+       this.terrains.forEach((terrain, index) => {
+        if(index === 1) {
+          terrain.offset.x = value;
+          terrain.update();
+        }
+       })
+      });
+  }
+
+  async createTerrain(i, j, offset = { x: 0, y: 0 }) {
     const terrain = new Terrain({
       offset: {
-        x: i,
-        y: j,
+        x: -j,
+        y: i,
       },
-      levelOfDetail: 1,
+      levelOfDetail: 0,
     });
 
     await terrain.create();
@@ -25,17 +52,21 @@ class TerrainManager {
   }
 
   async generate() {
-    for (let i = 0; i < 20; i++) {
-      for (let j = 0; j < 20; j++) {
-          await this.createTerrain(i, j);
+
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 10; j++) {
+        await this.createTerrain(i, j);
       }
     }
+
+    this.renderer.camera.lookAt(this.terrains[0].terrainMesh.position);
   }
 
   animate() {
     this.renderer.onUpdate = (elapsedTime) => {
       this.terrains.forEach((terrain, index) => {
         if (index == 1) {
+          // terrain.update();
         }
       });
     };

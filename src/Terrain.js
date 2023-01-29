@@ -4,6 +4,7 @@ import BezierEasing from 'bezier-easing';
 import * as noise from './utils/noise';
 import * as canvas from './utils/canvas';
 import { hexToRgb } from './utils/color';
+import { generateFallOffMap } from './fallOff';
 
 const MAX_SEGMENTS = 240;
 
@@ -16,24 +17,24 @@ class Terrain {
     this.segments = terrainParams.segments || MAX_SEGMENTS;
 
     this.seed = terrainParams.seed || 1;
-    this.scale = terrainParams.scale || 70;
+    this.scale = terrainParams.scale || 50;
     this.octaves = terrainParams.octaves || 4;
-    this.lacunarity = terrainParams.lacunarity || 2;
-    this.persistence = terrainParams.persistence || 0.5;
+    this.lacunarity = terrainParams.lacunarity || 3;
+    this.persistence = terrainParams.persistence || 0.3;
 
     this.offset = terrainParams.offset || { x: 0, y: 0 };
-    this.elevation = terrainParams.elevation || 18;
+    this.elevation = terrainParams.elevation || 10;
     this.levelOfDetail = terrainParams.levelOfDetail || 0;
 
     this.terrainMesh = null;
 
     this.noiseMap = [];
     this.colorMap = [];
+    this.fallOffMap = [];
   }
 
   async create() {
     await this.generateNoiseMap();
-    
     this.createGeometry();
 
     this.generateColorMap();
@@ -62,6 +63,10 @@ class Terrain {
     this.setTerrainColor();
     this.setElevation();
     this.updateGeometry();
+  }
+
+  generateFallOffMap() {
+    this.fallOffMap = generateFallOffMap(MAX_SEGMENTS);
   }
 
   setPosition() {}
@@ -107,7 +112,10 @@ class Terrain {
       octaves: this.octaves,
       lacunarity: this.lacunarity,
       persistance: this.persistence,
-      offset: this.offset,
+      offset: {
+        x: this.offset.x * MAX_SEGMENTS,
+        y: this.offset.y * MAX_SEGMENTS,
+      },
     });
   }
 
