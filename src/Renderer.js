@@ -45,12 +45,14 @@ class Renderer {
   }
 
   _update() {
+    const delta = clock.getDelta();
     const elapsedTime = clock.getElapsedTime();
 
     this.controls.update();
-    this.renderer.render(this.scene, this.camera);
+    // this.renderer.render(this.scene, this.camera);
+    this.renderer.render(this.scene, this.playerCamera);
 
-    this.onUpdate?.(elapsedTime);
+    this.onUpdate?.(elapsedTime, delta);
   }
 
   _initScene() {
@@ -68,9 +70,15 @@ class Renderer {
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     this.camera.position.set(0, 50, 100);
 
+    this.playerCamera =   new THREE.PerspectiveCamera(fov, aspect, near, far);
+
     // this.camera.position.set(800, 500, 1000);
 
+    const cameraHelper = new THREE.CameraHelper(this.playerCamera);
+
     this.addToScene(this.camera);
+    this.addToScene(this.playerCamera);
+    // this.addToScene(cameraHelper);
   }
 
   _initAmbientLights() {

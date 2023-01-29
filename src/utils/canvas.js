@@ -142,12 +142,13 @@ export function getImageData(image) {
 const regions = [
   {
     height: 0,
-    color: '#4377BA',
+    color: '#3E6EAC',
+
     name: 'deep water',
   },
   {
-    height: 0.05,
-    color: '#3E6EAC',
+    height: 0.07,
+    color: '#4377BA',
     name: 'shallow water',
   },
   {
