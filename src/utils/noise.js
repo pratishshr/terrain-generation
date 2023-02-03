@@ -1,5 +1,6 @@
 import { noise } from 'perlin';
 import { inverseLerp } from 'three/src/math/MathUtils';
+import { createNoiseMap } from './createNoise';
 
 noise.seed(1994);
 
@@ -8,7 +9,7 @@ function randomSeed(seed) {
   return x - Math.floor(x);
 }
 
-export function generateNoiseMap({
+export function generateNoiseMapForTerrain({
   mapWidth,
   mapHeight,
   scale,
@@ -95,7 +96,7 @@ export function generateNoiseMap({
   });
 }
 
-export async function createNoiseMap({
+export async function createNoiseMapWithWorker({
   mapWidth,
   mapHeight,
   scale,
@@ -106,9 +107,12 @@ export async function createNoiseMap({
   seed,
 }) {
   return new Promise((resolve) => {
-    const worker = new Worker(new URL('../workers/worker.js', import.meta.url), {
-      module: true,
-    });
+    const worker = new Worker(
+      new URL('../workers/worker.js', import.meta.url),
+      {
+        module: true,
+      }
+    );
 
     worker.postMessage({
       mapWidth,
@@ -124,5 +128,31 @@ export async function createNoiseMap({
     worker.onmessage = (e) => {
       resolve(e.data);
     };
+  });
+}
+
+export async function createNoiseMapWithoutWorker({
+  mapWidth,
+  mapHeight,
+  scale,
+  octaves,
+  persistance,
+  lacunarity,
+  offset,
+  seed,
+}) {
+  return new Promise((resolve) => {
+    const noiseMap = createNoiseMap({
+      mapWidth,
+      mapHeight,
+      scale,
+      octaves,
+      persistance,
+      lacunarity,
+      offset,
+      seed,
+    });
+
+    resolve(noiseMap);
   });
 }

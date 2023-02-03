@@ -33,7 +33,7 @@ class Terrain {
     this.colorMap = [];
     this.fallOffMap = [];
 
-    this.useWebWorker = false;
+    this.noiseType = params.noiseType || 'terrain';
   }
 
   async create() {
@@ -127,8 +127,8 @@ class Terrain {
   }
 
   async generateNoiseMap() {
-    if (this.useWebWorker) {
-      this.noiseMap = await noise.createNoiseMap({
+    if (this.noiseType == 'worker') {
+      this.noiseMap = await noise.createNoiseMapWithWorker({
         // Vertices = segments + 1
         mapWidth: this.segments + 1,
         mapHeight: this.segments + 1,
@@ -146,7 +146,26 @@ class Terrain {
       return;
     }
 
-    this.noiseMap = await noise.generateNoiseMap({
+    if (this.noiseType == 'without-worker') {
+      this.noiseMap = await noise.createNoiseMapWithoutWorker({
+        // Vertices = segments + 1
+        mapWidth: this.segments + 1,
+        mapHeight: this.segments + 1,
+        seed: this.seed,
+        scale: this.scale,
+        octaves: this.octaves,
+        lacunarity: this.lacunarity,
+        persistance: this.persistance,
+        offset: {
+          x: this.offset.x * MAX_SEGMENTS,
+          y: this.offset.y * MAX_SEGMENTS,
+        },
+      });
+
+      return;
+    }
+
+    this.noiseMap = await noise.generateNoiseMapForTerrain({
       // Vertices = segments + 1
       mapWidth: this.segments + 1,
       mapHeight: this.segments + 1,

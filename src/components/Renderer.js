@@ -65,13 +65,8 @@ class Renderer {
 
     this.playerCamera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 
-    // this.camera.position.set(800, 500, 1000);
-
-    const cameraHelper = new THREE.CameraHelper(this.playerCamera);
-
     this.addToScene(this.camera);
-    this.addToScene(this.playerCamera);
-    // this.addToScene(cameraHelper);
+    // this.addToScene(this.playerCamera);
   }
 
   _initAmbientLights() {

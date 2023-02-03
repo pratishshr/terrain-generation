@@ -6,7 +6,7 @@ import TerrainManager from '../components/TerrainManager';
 
 const clock = new THREE.Clock();
 
-class GridSimulation {
+class GridSimulationWithWorker {
   constructor() {
     this.keys = [];
     this.renderer = new Renderer({
@@ -14,6 +14,7 @@ class GridSimulation {
     });
     this.terrainManager = new TerrainManager({
       renderer: this.renderer,
+      useWorker: true,
     });
   }
 
@@ -103,4 +104,4 @@ class GridSimulation {
   }
 }
 
-export default GridSimulation;
+export default GridSimulationWithWorker;

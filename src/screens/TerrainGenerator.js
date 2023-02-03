@@ -25,7 +25,7 @@ class TerrainGenerator {
         y: 0,
       },
       elevation: 18,
-      levelOfDetail: 0,
+      levelOfDetail: 1,
       wireframe: true,
     };
 
@@ -117,7 +117,7 @@ class TerrainGenerator {
       this.terrain.width,
       this.terrain.height,
       this.terrain.segments,
-      this.terrain.levelOfDetail
+      0
     );
   }
 
@@ -162,7 +162,6 @@ class TerrainGenerator {
 
   async start() {
     this.renderer.render();
-    this.renderer.playerCamera.position.set(0, 50, 100);
 
     this.terrain = new Terrain({
       ...this.config,

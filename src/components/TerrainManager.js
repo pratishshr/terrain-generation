@@ -1,44 +1,37 @@
 import Terrain from './Terrain';
 
-import GUI from 'lil-gui';
-import { clamp } from 'three/src/math/MathUtils';
-
 class TerrainManager {
-  constructor({ renderer }) {
+  constructor({ renderer, useWorker }) {
     this.renderer = renderer;
 
     this.terrains = [];
     this.config = {
+      seed: 386,
+      scale: 70,
+      octaves: 4,
+      lacunarity: 2,
+      persistance: 0.5,
       offset: {
         x: 0,
         y: 0,
       },
+      elevation: 18,
+      levelOfDetail: 1,
+      wireframe: false,
     };
 
-    // this._initConfigGUI();
-
-    // Debug UI
-    this.gui = new GUI();
+    this.useWorker = useWorker || false;
   }
 
-  _initConfigGUI() {
-    this.gui.add(this.config.offset, 'x', -500, 500, 1).onChange(async (value) => {
-      this.terrains.forEach((terrain, index) => {
-        if (index === 1) {
-          terrain.offset.x = value;
-          terrain.update();
-        }
-      });
-    });
-  }
-
-  async createTerrain(i, j, offset = { x: 0, y: 0 }) {
+  async createTerrain(i, j) {
     const terrain = new Terrain({
+      ...this.config,
       offset: {
         x: -j,
         y: i,
       },
-      levelOfDetail: 0,
+      fallOffMap: false,
+      noiseType: this.useWorker ? 'worker' : 'without-worker',
     });
 
     await terrain.create();
@@ -59,14 +52,9 @@ class TerrainManager {
     this.renderer.camera.lookAt(this.terrains[0].terrainMesh.position);
   }
 
-  animate() {
-    this.renderer.onUpdate = (elapsedTime) => {
-      this.terrains.forEach((terrain, index) => {
-        if (index == 1) {
-          // terrain.update();
-        }
-      });
-    };
+  onUpdate() {
+    this.terrains.forEach((terrain) => {
+    });
   }
 }
 
