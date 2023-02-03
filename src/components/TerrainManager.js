@@ -3,9 +3,6 @@ import Terrain from './Terrain';
 import GUI from 'lil-gui';
 import { clamp } from 'three/src/math/MathUtils';
 
-// Debug UI
-const gui = new GUI();
-
 class TerrainManager {
   constructor({ renderer }) {
     this.renderer = renderer;
@@ -18,20 +15,21 @@ class TerrainManager {
       },
     };
 
-    this._initConfigGUI();
+    // this._initConfigGUI();
+
+    // Debug UI
+    this.gui = new GUI();
   }
 
   _initConfigGUI() {
-    gui
-      .add(this.config.offset, 'x', -500, 500, 1)
-      .onChange(async (value) => {
-       this.terrains.forEach((terrain, index) => {
-        if(index === 1) {
+    this.gui.add(this.config.offset, 'x', -500, 500, 1).onChange(async (value) => {
+      this.terrains.forEach((terrain, index) => {
+        if (index === 1) {
           terrain.offset.x = value;
           terrain.update();
         }
-       })
       });
+    });
   }
 
   async createTerrain(i, j, offset = { x: 0, y: 0 }) {
@@ -52,7 +50,6 @@ class TerrainManager {
   }
 
   async generate() {
-
     for (let i = 0; i < 10; i++) {
       for (let j = 0; j < 10; j++) {
         await this.createTerrain(i, j);

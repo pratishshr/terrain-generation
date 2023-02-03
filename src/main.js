@@ -1,74 +1,25 @@
-import './style.css';
-import * as THREE from 'three';
+import './styles/style.css';
 
-import Renderer from './Renderer';
-import TerrainManager from './TerrainManager';
-import Player from './Player';
+import GridSimulation from './screens/GridSimulation';
+import TerrainGenerator from './screens/TerrainGenerator';
 
-const keys = [];
+// Configure Routes
+function init() {
+  const generatorRouteButton = document.querySelector('#route-generator');
+  const simulationRouteButton = document.querySelector('#route-simulation');
 
-const renderer = new Renderer();
-renderer.render();
 
-const terrainManager = new TerrainManager({
-  renderer,
-});
+  generatorRouteButton.addEventListener('click', () => {
+    const terrainGenerator = new TerrainGenerator();
 
-terrainManager.generate();
-terrainManager.animate();
-
-const player = new Player();
-player.create();
-
-renderer.onUpdate = (elapsedTime, delta) => {
-  const lookAt = new THREE.Vector3(0, 0, 0);
-  lookAt.x = player.mesh.position.x;
-  lookAt.y = player.mesh.position.y;
-  lookAt.z = player.mesh.position.z;
-
-  renderer.playerCamera.position.setZ(player.mesh.position.z + 40);
-  renderer.playerCamera.position.setX(player.mesh.position.x);
-  renderer.playerCamera.position.setY(70);
-
-  renderer.playerCamera.lookAt(lookAt);
-
-  player.update(elapsedTime);
-
-  document.body.addEventListener('keydown', function (e) {
-    keys[e.key] = true;
+    terrainGenerator.start();
   });
 
-  document.body.addEventListener('keyup', function (e) {
-    keys[e.key] = false;
+  simulationRouteButton.addEventListener('click', () => {
+    const gridSimulation = new GridSimulation();
+
+    gridSimulation.start();
   });
+}
 
-  if (keys['w']) {
-    player.velY++;
-  }
-
-  if (keys['a']) {
-    player.velX--;
-  }
-
-  if (keys['s']) {
-    player.velY--;
-  }
-
-  if (keys['d']) {
-    player.velX++;
-  }
-
-  if (keys[' ']) {
-    player.speed = 0.2;
-  } else {
-    player.speed = 0.1;
-  }
-
-  player.velX *= player.friction;
-  player.velY *= player.friction;
-
-  player.mesh.position.x += player.speed * player.velX;
-  player.mesh.position.z -= player.speed * player.velY;
-};
-
-renderer.addToScene(player.mesh);
+init();

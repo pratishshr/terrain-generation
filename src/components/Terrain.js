@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import BezierEasing from 'bezier-easing';
 
-import * as noise from './utils/noise';
-import * as canvas from './utils/canvas';
-import { hexToRgb } from './utils/color';
-import { generateFallOffMap } from './fallOff';
+import * as noise from '../utils/noise';
+import * as canvas from '../utils/canvas';
+import { hexToRgb } from '../utils/color';
+import { generateFallOffMap } from '../utils/fallOff';
 
 const MAX_SEGMENTS = 240;
 
@@ -25,6 +25,7 @@ class Terrain {
     this.offset = terrainParams.offset || { x: 0, y: 0 };
     this.elevation = terrainParams.elevation || 10;
     this.levelOfDetail = terrainParams.levelOfDetail || 0;
+    this.wireframe = terrainParams.wireframe || false;
 
     this.terrainMesh = null;
 
@@ -35,6 +36,7 @@ class Terrain {
 
   async create() {
     await this.generateNoiseMap();
+
     this.createGeometry();
 
     this.generateColorMap();
@@ -89,6 +91,7 @@ class Terrain {
     });
 
     this.terrainMesh = new THREE.Mesh(planeGeometry, material);
+    this.terrainMesh.material.wireframe = this.wireframe;
     this.terrainMesh.rotation.x = -Math.PI / 2;
     this.terrainMesh.receiveShadow = true;
     this.terrainMesh.castShadow = true;
@@ -187,6 +190,11 @@ class Terrain {
     for (let i = 0; i < count; i++) {
       position.setZ(i, heights[i]);
     }
+  }
+
+  update() {
+    this.terrainMesh.geometry.computeVertexNormals();
+    this.terrainMesh.geometry.getAttribute('position').needsUpdate = true;
   }
 }
 

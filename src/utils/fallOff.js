@@ -1,5 +1,3 @@
-import { OneMinusDstAlphaFactor } from 'three';
-
 function evaluate(value) {
   let a = 3;
   let b = 2.2;

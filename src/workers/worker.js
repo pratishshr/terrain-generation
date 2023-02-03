@@ -1,6 +1,6 @@
 import { clamp } from 'three/src/math/MathUtils';
 import { noise } from 'perlin';
-import { generateFallOffMap } from '../fallOff';
+import { generateFallOffMap } from '../utils/fallOff';
 
 noise.seed(1994);
 
@@ -18,7 +18,7 @@ function createNoiseMap({
   lacunarity,
   offset,
   seed,
-  useFallOff = true
+  useFallOff = false
 }) {
   let noiseMap = [];
   const fallOffMap = generateFallOffMap(mapWidth);

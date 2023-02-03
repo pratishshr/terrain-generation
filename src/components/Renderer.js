@@ -1,9 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-
-const clock = new THREE.Clock();
 class Renderer {
-  constructor() {
+  constructor(options) {
     this.scene;
     this.canvas;
     this.camera;
@@ -11,8 +9,7 @@ class Renderer {
     this.ambientLight;
     this.directionalLight;
 
-    // Callbacks
-    this.onUpdate;
+    this.hasOrbitControls = options?.orbitControls || false;
 
     this.sizes = {
       width: window.innerWidth,
@@ -29,11 +26,14 @@ class Renderer {
     this._initDirectionalLights();
     this._initControls();
     this._initEventListeners();
+
+    if (this.hasOrbitControls) {
+      this._initControls();
+    }
   }
 
   render() {
     this._render();
-    this._startRenderLoop();
   }
 
   addToScene(item) {
@@ -44,20 +44,15 @@ class Renderer {
     this.onUpdate = onUpdate;
   }
 
-  _update() {
-    const delta = clock.getDelta();
-    const elapsedTime = clock.getElapsedTime();
-
+  update() {
     this.controls.update();
     // this.renderer.render(this.scene, this.camera);
     this.renderer.render(this.scene, this.playerCamera);
-
-    this.onUpdate?.(elapsedTime, delta);
   }
 
   _initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#2E2E38');
+    this.scene.background = new THREE.Color('#111827');
     this.canvas = document.querySelector('canvas.webgl');
   }
 
@@ -70,7 +65,7 @@ class Renderer {
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     this.camera.position.set(0, 50, 100);
 
-    this.playerCamera =   new THREE.PerspectiveCamera(fov, aspect, near, far);
+    this.playerCamera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 
     // this.camera.position.set(800, 500, 1000);
 
@@ -108,7 +103,7 @@ class Renderer {
   }
 
   _initControls() {
-    this.controls = new OrbitControls(this.camera, this.canvas);
+    this.controls = new OrbitControls(this.playerCamera, this.canvas);
     this.controls.enableDamping = true;
     // this.controls.target.set(800, 0, 0);
   }
@@ -120,11 +115,6 @@ class Renderer {
 
     this.renderer.setSize(this.sizes.width, this.sizes.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  }
-
-  _startRenderLoop() {
-    this._update();
-    window.requestAnimationFrame(() => this._startRenderLoop());
   }
 
   _initEventListeners() {
