@@ -8,7 +8,7 @@ html,
 body
 {
     overflow: hidden;
-    background-color: #111827;
+    background-color: #171717;
     color: #f8fafc;
     font-family: 'Roboto', sans-serif;
 }
@@ -26,7 +26,7 @@ body
     top: 0;
     left: 0;
     z-index: 999;
-    border: 1px solid white;
+    border: 1px solid #f3f3f3;
     width: 256px;
     height: 256px
 }
@@ -36,7 +36,7 @@ body
     top: 256px;
     left: 0;
     z-index: 999;
-    border: 1px solid white;
+    border: 1px solid #f3f3f3;
     width: 256px;
     height: 256px
 }
@@ -63,18 +63,52 @@ body
     cursor: pointer;
     text-align: center;
     font-size: 24px;
+    border-radius: 8px;
 }
 
 .button:hover {
     background-color: #f8fafc;
-    color: #111827;
+    color: #171717;
 }
 
 .home-button {
     position: fixed;
-    top: 50px;
-    left: 100px;
+    bottom: 50px;
+    right: 100px;
     text-decoration: none;
     color: #f8fafc;
     font-size: 20px;
+}
+
+.generate-button {
+    width: 200px;
+    position: fixed;
+    bottom: 50px;
+    right: 800px;
+    text-decoration: none;
+    color: #f8fafc;
+    font-size: 16px;
+    border: 1px solid #f8fafc;
+    padding: 15px 20px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 6px;
+}
+
+.download-button {
+    width: 200px;
+    position: fixed;
+    bottom: 50px;
+    right: 400px;
+    text-decoration: none;
+    color: #171717;
+    font-size: 16px;
+    border: 1px solid #f8fafc;
+    background-color: #f8fafc;
+    padding: 15px 20px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 6px;
 }

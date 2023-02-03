@@ -85,7 +85,7 @@ class GridSimulation {
       window.requestAnimationFrame(() => startRenderLoop());
     };
 
-    startRenderLoop();
+    // startRenderLoop();
   }
 }
 

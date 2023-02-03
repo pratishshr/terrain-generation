@@ -2,14 +2,23 @@ import { getSegmentsPerLine } from './calculations';
 import { getRGB, getValueFromRGB } from './color';
 import * as math from './math';
 
-export function destroy() {
+export function destroyNoiseImage() {
   const prevCanvas = document.querySelector('.height-map');
   if (prevCanvas) {
     document.body.removeChild(prevCanvas);
   }
 }
 
+export function destroyColorMap() {
+  const prevCanvas = document.querySelector('.color-map');
+  if (prevCanvas) {
+    document.body.removeChild(prevCanvas);
+  }
+}
+
 export function generateNoiseImage(noiseMap, width, height) {
+  destroyNoiseImage();
+
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -32,16 +41,6 @@ export function generateNoiseImage(noiseMap, width, height) {
   canvas.className = 'height-map';
   document.body.appendChild(canvas);
 
-  // const imageData = context.getImageData(0, 0, width, height);
-
-  // for (let i = 0; i < imageData.data.length; i += 4) {
-  //   let r = imageData.data[i];
-  //   let g = imageData.data[i + 1];
-  //   let b = imageData.data[i + 2];
-
-  //   heightData.push(getValueFromRGB([r, g, b]));
-  // }
-
   return heightData;
 }
 
@@ -52,6 +51,7 @@ export function generateColorImage(
   maxSegments,
   levelOfDetail
 ) {
+  destroyColorMap();
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -139,7 +139,7 @@ export function getImageData(image) {
   return heightData;
 }
 
-const regions = [
+const newRegions = [
   {
     height: 0,
     color: '#3E6EAC',
@@ -152,7 +152,7 @@ const regions = [
     name: 'shallow water',
   },
   {
-  height: 0.2,
+    height: 0.2,
     color: '#9C8130',
     name: 'sand',
   },
@@ -165,6 +165,33 @@ const regions = [
   { height: 0.6, color: '#5C4C33', name: 'rock' },
   { height: 0.9, color: '#50422C', name: 'rock2' },
   // { height: 1, color: '#50422C', name: 'rock3' },
+  { height: 1, color: '#F9F8F2', name: 'snow' },
+];
+
+const regions = [
+  {
+    height: 0.3,
+    color: '#4377BA',
+    name: 'deep water',
+  },
+  {
+    height: 0.4,
+    color: '#3E6EAC',
+    name: 'shallow water',
+  },
+  {
+    height: 0.48,
+    color: '#9C8130',
+    name: 'sand',
+  },
+  {
+    height: 0.55,
+    color: '#57814E',
+    name: 'grass',
+  },
+  { height: 0.6, color: '#40794D', name: 'grass2' },
+  { height: 0.7, color: '#5C4C33', name: 'rock' },
+  { height: 0.85, color: '#50422C', name: 'rock2' },
   { height: 1, color: '#F9F8F2', name: 'snow' },
 ];
 
@@ -191,8 +218,8 @@ export function createColorMap({ noiseMap, levelOfDetail }) {
           colorMap.push(regions[i].color);
           context.fillStyle = regions[i].color;
           context.fillRect(x, y, 1, 1);
-          break
-        } 
+          break;
+        }
       }
     }
   }

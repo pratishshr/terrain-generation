@@ -24,7 +24,6 @@ class Renderer {
     this._initCamera();
     this._initAmbientLights();
     this._initDirectionalLights();
-    this._initControls();
     this._initEventListeners();
 
     if (this.hasOrbitControls) {
@@ -44,15 +43,14 @@ class Renderer {
     this.onUpdate = onUpdate;
   }
 
-  update() {
+  onUpdate() {
     this.controls.update();
-    // this.renderer.render(this.scene, this.camera);
-    this.renderer.render(this.scene, this.playerCamera);
+    this.renderer.render(this.scene, this.camera);
   }
 
   _initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#111827');
+    this.scene.background = new THREE.Color('#171717');
     this.canvas = document.querySelector('canvas.webgl');
   }
 
@@ -63,7 +61,7 @@ class Renderer {
     const far = 10000.0;
 
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    this.camera.position.set(0, 50, 100);
+    this.camera.position.set(-50, 50, 100);
 
     this.playerCamera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 
@@ -103,7 +101,7 @@ class Renderer {
   }
 
   _initControls() {
-    this.controls = new OrbitControls(this.playerCamera, this.canvas);
+    this.controls = new OrbitControls(this.camera, this.canvas);
     this.controls.enableDamping = true;
     // this.controls.target.set(800, 0, 0);
   }

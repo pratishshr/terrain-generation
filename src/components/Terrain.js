@@ -20,7 +20,7 @@ class Terrain {
     this.scale = terrainParams.scale || 50;
     this.octaves = terrainParams.octaves || 4;
     this.lacunarity = terrainParams.lacunarity || 3;
-    this.persistence = terrainParams.persistence || 0.3;
+    this.persistance = terrainParams.persistance || 0.3;
 
     this.offset = terrainParams.offset || { x: 0, y: 0 };
     this.elevation = terrainParams.elevation || 10;
@@ -32,6 +32,8 @@ class Terrain {
     this.noiseMap = [];
     this.colorMap = [];
     this.fallOffMap = [];
+
+    this.useWebWorker = false;
   }
 
   async create() {
@@ -53,6 +55,8 @@ class Terrain {
   }
 
   updateGeometry() {
+    this.terrainMesh.material.wireframe = this.wireframe;
+
     this.terrainMesh.geometry.computeVertexNormals();
     this.terrainMesh.geometry.getAttribute('position').needsUpdate = true;
   }
@@ -71,7 +75,24 @@ class Terrain {
     this.fallOffMap = generateFallOffMap(MAX_SEGMENTS);
   }
 
-  setPosition() {}
+  regenerate() {
+    this.regenerateGeometry();
+    this.update();
+  }
+
+  regenerateGeometry() {
+    const { segmentsPerLine } = this._getSegmentsPerLine(
+      MAX_SEGMENTS,
+      this.levelOfDetail
+    );
+
+    this.terrainMesh.geometry = new THREE.PlaneGeometry(
+      this.width,
+      this.height,
+      segmentsPerLine,
+      segmentsPerLine
+    );
+  }
 
   createGeometry() {
     const { segmentsPerLine } = this._getSegmentsPerLine(
@@ -106,7 +127,26 @@ class Terrain {
   }
 
   async generateNoiseMap() {
-    this.noiseMap = await noise.createNoiseMap({
+    if (this.useWebWorker) {
+      this.noiseMap = await noise.createNoiseMap({
+        // Vertices = segments + 1
+        mapWidth: this.segments + 1,
+        mapHeight: this.segments + 1,
+        seed: this.seed,
+        scale: this.scale,
+        octaves: this.octaves,
+        lacunarity: this.lacunarity,
+        persistance: this.persistance,
+        offset: {
+          x: this.offset.x * MAX_SEGMENTS,
+          y: this.offset.y * MAX_SEGMENTS,
+        },
+      });
+
+      return;
+    }
+
+    this.noiseMap = await noise.generateNoiseMap({
       // Vertices = segments + 1
       mapWidth: this.segments + 1,
       mapHeight: this.segments + 1,
@@ -114,7 +154,7 @@ class Terrain {
       scale: this.scale,
       octaves: this.octaves,
       lacunarity: this.lacunarity,
-      persistance: this.persistence,
+      persistance: this.persistance,
       offset: {
         x: this.offset.x * MAX_SEGMENTS,
         y: this.offset.y * MAX_SEGMENTS,
@@ -192,9 +232,8 @@ class Terrain {
     }
   }
 
-  update() {
-    this.terrainMesh.geometry.computeVertexNormals();
-    this.terrainMesh.geometry.getAttribute('position').needsUpdate = true;
+  onUpdate() {
+    this.updateGeometry();
   }
 }
 
