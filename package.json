@@ -1,5 +1,5 @@
 {
-  "repository": "#",
+  "repository": "terrain-generation",
   "license": "UNLICENSED",
   "scripts": {
     "build": "webpack --config ./bundler/webpack.prod.js",
