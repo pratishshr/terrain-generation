@@ -4,7 +4,11 @@ import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter';
 
 import Terrain from '../components/Terrain';
 import Renderer from '../components/Renderer';
-import { generateColorImage, generateNoiseImage } from '../utils/canvas';
+import {
+  createColorMap,
+  generateColorImage,
+  generateNoiseImage,
+} from '../utils/canvas';
 import { downloadObjectAsJson } from '../utils/downloader';
 
 const clock = new THREE.Clock();
@@ -97,28 +101,23 @@ class TerrainGenerator {
     });
   }
 
-  _updateTerrain() {
+  async _updateTerrain() {
+    await this.terrain.update();
+
     this._generateNoiseImage();
     this._generateColorMap();
-    this.terrain.update();
   }
 
   _generateNoiseImage() {
-    generateNoiseImage(
-      this.terrain.noiseMap,
-      this.terrain.width,
-      this.terrain.height
-    );
+    generateNoiseImage(this.terrain.noiseMap);
   }
 
   _generateColorMap() {
-    generateColorImage(
-      this.terrain.noiseMap,
-      this.terrain.width,
-      this.terrain.height,
-      this.terrain.segments,
-      0
-    );
+    generateColorImage({
+      noiseMap: this.terrain.noiseMap,
+      levelOfDetail: 0,
+      showColorMap: true, 
+    });
   }
 
   _startTerrainAnimation(elapsedTime) {

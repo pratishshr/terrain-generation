@@ -8,6 +8,62 @@ import { generateFallOffMap } from '../utils/fallOff';
 
 const MAX_SEGMENTS = 240;
 
+const regionsForSimulation = [
+  {
+    height: 0,
+    color: '#3E6EAC',
+
+    name: 'deep water',
+  },
+  {
+    height: 0.07,
+    color: '#4377BA',
+    name: 'shallow water',
+  },
+  {
+    height: 0.2,
+    color: '#9C8130',
+    name: 'sand',
+  },
+  {
+    height: 0.3,
+    color: '#57814E',
+    name: 'grass',
+  },
+  { height: 0.4, color: '#40794D', name: 'grass2' },
+  { height: 0.6, color: '#5C4C33', name: 'rock' },
+  { height: 0.9, color: '#50422C', name: 'rock2' },
+  // { height: 1, color: '#50422C', name: 'rock3' },
+  { height: 1, color: '#F9F8F2', name: 'snow' },
+];
+
+const regions = [
+  {
+    height: 0.3,
+    color: '#4377BA',
+    name: 'deep water',
+  },
+  {
+    height: 0.4,
+    color: '#3E6EAC',
+    name: 'shallow water',
+  },
+  {
+    height: 0.48,
+    color: '#9C8130',
+    name: 'sand',
+  },
+  {
+    height: 0.55,
+    color: '#57814E',
+    name: 'grass',
+  },
+  { height: 0.6, color: '#40794D', name: 'grass2' },
+  { height: 0.7, color: '#5C4C33', name: 'rock' },
+  { height: 0.85, color: '#50422C', name: 'rock2' },
+  { height: 1, color: '#F9F8F2', name: 'snow' },
+];
+
 class Terrain {
   constructor(params) {
     const terrainParams = params || {};
@@ -182,9 +238,11 @@ class Terrain {
   }
 
   generateColorMap() {
+    console.log(this.noiseType);
     this.colorMap = canvas.createColorMap({
       noiseMap: this.noiseMap,
       levelOfDetail: this.levelOfDetail,
+      regions: this.noiseType === 'terrain' ? regions : regionsForSimulation,
     });
   }
 

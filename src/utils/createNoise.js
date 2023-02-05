@@ -88,12 +88,6 @@ export function createNoiseMap({
 
   for (let y = 0; y < mapHeight; y++) {
     for (let x = 0; x < mapWidth; x++) {
-      // noiseMap[x][y] = inverseLerp(
-      //   minNoiseHeight,
-      //   maxNoiseHeight,
-      //   noiseMap[x][y]
-      // );
-
       let normalizedHeight = noiseMap[x][y] / maxPossibleHeight;
       noiseMap[x][y] = clamp(normalizedHeight, 0, 1);
 
