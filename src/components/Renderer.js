@@ -44,7 +44,10 @@ class Renderer {
   }
 
   onUpdate() {
-    this.controls.update();
+    if (this.hasOrbitControls) {
+      this.controls.update();
+    }
+    
     this.renderer.render(this.scene, this.camera);
   }
 

@@ -10,7 +10,7 @@ class GridSimulationWithWorker {
   constructor() {
     this.keys = [];
     this.renderer = new Renderer({
-      orbitControls: true,
+      orbitControls: false,
     });
     this.terrainManager = new TerrainManager({
       renderer: this.renderer,
@@ -18,80 +18,70 @@ class GridSimulationWithWorker {
     });
   }
 
+  addEventListeners() {
+    document.body.addEventListener('keydown', (e) => {
+      this.keys[e.key] = true;
+    });
+
+    document.body.addEventListener('keyup', (e) => {
+      this.keys[e.key] = false;
+    });
+  }
+
   async start() {
+    this.addEventListeners();
     this.renderer.render();
+
+    this.player = new Player();
+    this.player.create();
+
+    this.renderer.addToScene(this.player.mesh);
+
     this._update();
 
+
     await this.terrainManager.generate();
+  }
 
-    // terrainManager.animate();
+  _updatePlayer(elapsedTime) {
+    const lookAt = new THREE.Vector3(0, 0, 0);
+    lookAt.x = this.player.mesh.position.x;
+    lookAt.y = this.player.mesh.position.y;
+    lookAt.z = this.player.mesh.position.z;
 
-    // const player = new Player();
-    // player.create();
+    this.renderer.camera.position.setZ(this.player.mesh.position.z + 40);
+    this.renderer.camera.position.setX(this.player.mesh.position.x);
+    this.renderer.camera.position.setY(200);
 
-    // renderer.addToScene(player.mesh);
+    this.renderer.camera.lookAt(lookAt);
 
-    // const updatePlayer = (elapsedTime) => {
-    //   const lookAt = new THREE.Vector3(0, 0, 0);
-    //   lookAt.x = player.mesh.position.x;
-    //   lookAt.y = player.mesh.position.y;
-    //   lookAt.z = player.mesh.position.z;
+    if (this.keys['w']) {
+      this.player.velY++;
+    }
 
-    //   renderer.playerCamera.position.setZ(player.mesh.position.z + 40);
-    //   renderer.playerCamera.position.setX(player.mesh.position.x);
-    //   renderer.playerCamera.position.setY(70);
+    if (this.keys['a']) {
+      this.player.velX--;
+    }
 
-    //   renderer.playerCamera.lookAt(lookAt);
+    if (this.keys['s']) {
+      this.player.velY--;
+    }
 
-    //   player.update(elapsedTime);
+    if (this.keys['d']) {
+      this.player.velX++;
+    }
 
-    //   document.body.addEventListener('keydown', function (e) {
-    //     keys[e.key] = true;
-    //   });
+    if (this.keys[' ']) {
+      this.player.speed = 0.2;
+    } else {
+      this.player.speed = 0.1;
+    }
 
-    //   document.body.addEventListener('keyup', function (e) {
-    //     keys[e.key] = false;
-    //   });
+    this.player.velX *= this.player.friction;
+    this.player.velY *= this.player.friction;
 
-    //   if (keys['w']) {
-    //     player.velY++;
-    //   }
-
-    //   if (keys['a']) {
-    //     player.velX--;
-    //   }
-
-    //   if (keys['s']) {
-    //     player.velY--;
-    //   }
-
-    //   if (keys['d']) {
-    //     player.velX++;
-    //   }
-
-    //   if (keys[' ']) {
-    //     player.speed = 0.2;
-    //   } else {
-    //     player.speed = 0.1;
-    //   }
-
-    //   player.velX *= player.friction;
-    //   player.velY *= player.friction;
-
-    //   player.mesh.position.x += player.speed * player.velX;
-    //   player.mesh.position.z -= player.speed * player.velY;
-    // };
-
-    // const startRenderLoop = () => {
-    //   const elapsedTime = clock.getElapsedTime();
-
-    //   renderer.update();
-    //   updatePlayer(elapsedTime);
-
-    //   window.requestAnimationFrame(() => startRenderLoop());
-    // };
-
-    // startRenderLoop();
+    this.player.mesh.position.x += this.player.speed * this.player.velX;
+    this.player.mesh.position.z -= this.player.speed * this.player.velY;
   }
 
   _update() {
@@ -100,6 +90,7 @@ class GridSimulationWithWorker {
     this.terrainManager.onUpdate();
     this.renderer.onUpdate();
 
+    this._updatePlayer(elapsedTime);
     window.requestAnimationFrame(() => this._update());
   }
 }

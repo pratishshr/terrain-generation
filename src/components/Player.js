@@ -18,11 +18,6 @@ class Player {
 
     this.mesh.position.set(0, 10, 0);
   }
-
-  update(elapsedTime) {
-    // this.mesh.position.z += -elapsedTime * 0.1;
-    // this.mesh.position.x += elapsedTime * 0.1;
-  }
 }
 
 export default Player;

@@ -29,8 +29,8 @@ class TerrainGenerator {
         y: 0,
       },
       elevation: 18,
-      levelOfDetail: 1,
-      wireframe: true,
+      levelOfDetail: 0,
+      wireframe: false,
     };
 
     this.gui = new GUI();
