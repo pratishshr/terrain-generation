@@ -98,7 +98,7 @@ class TerrainGenerator {
     this.gui.add(this.config, 'seed', 1, 1000, 1).onChange((value) => {
       this.terrain.seed = value;
       this._updateTerrain();
-    });
+    }).listen();
   }
 
   async _updateTerrain() {
@@ -134,6 +134,7 @@ class TerrainGenerator {
       this.config.seed = Math.floor(Math.random() * 1000);
       this.terrain.seed = this.config.seed;
       this._updateTerrain();
+
     });
 
     document.body.appendChild(generateButton);
@@ -144,8 +145,8 @@ class TerrainGenerator {
     downloadButton.addEventListener('click', () => {
       exporter.parse(
         this.renderer.scene,
-        function (gltf) {
-          downloadObjectAsJson(gltf, 'terrain.gltf');
+        function (result) {
+          downloadObjectAsJson(result, 'terrain.gltf');
         },
         function (error) {
           console.log('An error happened');

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 
+import Stats from 'stats.js';
 import Player from '../components/Player';
 import Renderer from '../components/Renderer';
 import { MAX_SEGMENTS } from '../components/Terrain';
@@ -19,10 +20,19 @@ class GridSimulationWithWorker {
       initialLevelOfDetail: 4,
     });
 
-    this.wireframe = true;
+    this.wireframe = false;
     this.cameraPosition = {
       y: 1000,
     };
+
+    this.addStats();
+  }
+
+  addStats() {
+    this.stats = new Stats();
+    this.stats.showPanel(0);
+
+    document.body.appendChild(this.stats.dom);
   }
 
   addEventListeners() {
@@ -81,7 +91,7 @@ class GridSimulationWithWorker {
 
   createToggleWireFrameButton() {
     const button = document.createElement('div');
-    button.innerHTML = '𐄳 Wireframe: ON';
+    button.innerHTML = `𐄳 Wireframe: ${this.wireframe ? 'ON' : 'OFF'}`;
     button.className = 'wireframe-button';
 
     button.addEventListener('click', () => {
@@ -202,6 +212,8 @@ class GridSimulationWithWorker {
   }
 
   _update() {
+    this.stats.begin();
+
     const elapsedTime = clock.getElapsedTime();
 
     this.terrainManager.onUpdate();
@@ -209,6 +221,8 @@ class GridSimulationWithWorker {
 
     this._updatePlayer(elapsedTime);
     this._updateTerrainChunks();
+
+    this.stats.end();
 
     window.requestAnimationFrame(() => this._update());
   }

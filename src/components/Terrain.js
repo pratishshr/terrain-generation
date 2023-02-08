@@ -81,7 +81,7 @@ class Terrain {
     this.offset = terrainParams.offset || { x: 0, y: 0 };
     this.elevation = terrainParams.elevation || 10;
     this.levelOfDetail = terrainParams.levelOfDetail || 0;
-    this.wireframe = true;
+    this.wireframe = terrainParams.wireframe || false;
 
     this.terrainMesh = null;
 

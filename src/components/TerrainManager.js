@@ -17,7 +17,7 @@ class TerrainManager {
         y: 0,
       },
       elevation: 18,
-      levelOfDetail: initialLevelOfDetail || 4,
+      levelOfDetail: initialLevelOfDetail,
       wireframe: false,
     };
 
