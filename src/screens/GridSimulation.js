@@ -49,7 +49,7 @@ class GridSimulation {
 
     this.renderer.camera.position.setZ(this.player.mesh.position.z + 40);
     this.renderer.camera.position.setX(this.player.mesh.position.x);
-    this.renderer.camera.position.setY(200);
+    this.renderer.camera.position.setY(1000);
 
     this.renderer.camera.lookAt(lookAt);
 

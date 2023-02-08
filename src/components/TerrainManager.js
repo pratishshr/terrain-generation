@@ -16,7 +16,7 @@ class TerrainManager {
         y: 0,
       },
       elevation: 18,
-      levelOfDetail: 1,
+      levelOfDetail: 4,
       wireframe: false,
     };
 
@@ -42,19 +42,34 @@ class TerrainManager {
     this.terrains.push(terrain);
   }
 
-  async generate() {
-    for (let i = 0; i < 20; i++) {
-      for (let j = 0; j < 20; j++) {
-        await this.createTerrain(i, j);
+  async withSpiral(X, Y, callback) {
+    let x = 0;
+    let y = 0;
+    let dx = 0;
+    let dy = -1;
+    for (let i = 0; i < Math.max(X, Y) ** 2; i++) {
+      if (-X / 2 < x && x <= X / 2 && -Y / 2 < y && y <= Y / 2) {
+        await callback(x, y);
       }
+
+      if (x === y || (x < 0 && x === -y) || (x > 0 && x === 1 - y)) {
+        [dx, dy] = [-dy, dx];
+      }
+      x += dx;
+      y += dy;
     }
+  }
+
+  async generate() {
+    await this.withSpiral(10, 10, async (i, j) => {
+      await this.createTerrain(i, j);
+    });
 
     this.renderer.camera.lookAt(this.terrains[0].terrainMesh.position);
   }
 
   onUpdate() {
-    this.terrains.forEach((terrain) => {
-    });
+    this.terrains.forEach((terrain) => {});
   }
 }
 
