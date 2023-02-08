@@ -16,6 +16,10 @@ class GridSimulationWithWorker {
       renderer: this.renderer,
       useWorker: true,
     });
+
+    this.cameraPosition = {
+      y: 1000,
+    };
   }
 
   addEventListeners() {
@@ -28,6 +32,22 @@ class GridSimulationWithWorker {
     });
   }
 
+  toggleCamera() {
+    this.cameraPosition.y = this.cameraPosition.y === 1000 ? 30 : 1000;
+  }
+
+  createButtons() {
+    const button = document.createElement('div');
+    button.innerHTML = '🎥 Toggle camera';
+    button.className = 'camera-button';
+
+    button.addEventListener('click', () => {
+      this.toggleCamera();
+    });
+
+    document.body.appendChild(button);
+  }
+
   async start() {
     this.addEventListeners();
     this.renderer.render();
@@ -35,10 +55,11 @@ class GridSimulationWithWorker {
     this.player = new Player();
     this.player.create();
 
+    this.createButtons();
+
     this.renderer.addToScene(this.player.mesh);
 
     this._update();
-
 
     await this.terrainManager.generate();
   }
@@ -51,7 +72,7 @@ class GridSimulationWithWorker {
 
     this.renderer.camera.position.setZ(this.player.mesh.position.z + 40);
     this.renderer.camera.position.setX(this.player.mesh.position.x);
-    this.renderer.camera.position.setY(1000);
+    this.renderer.camera.position.setY(this.cameraPosition.y);
 
     this.renderer.camera.lookAt(lookAt);
 

@@ -12,8 +12,8 @@ class Player {
 
   create() {
     this.mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshBasicMaterial({ color: 'white' })
+      new THREE.SphereGeometry(1.5),
+      new THREE.MeshLambertMaterial({ color: 'gray'})
     );
 
     this.mesh.position.set(0, 10, 0);
