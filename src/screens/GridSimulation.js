@@ -14,6 +14,7 @@ class GridSimulation {
     });
     this.terrainManager = new TerrainManager({
       renderer: this.renderer,
+      initialLevelOfDetail: 1
     });
   }
 

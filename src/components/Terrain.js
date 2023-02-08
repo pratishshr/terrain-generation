@@ -6,7 +6,7 @@ import * as canvas from '../utils/canvas';
 import { hexToRgb } from '../utils/color';
 import { generateFallOffMap } from '../utils/fallOff';
 
-const MAX_SEGMENTS = 240;
+export const MAX_SEGMENTS = 240;
 
 const regionsForSimulation = [
   {
@@ -81,7 +81,7 @@ class Terrain {
     this.offset = terrainParams.offset || { x: 0, y: 0 };
     this.elevation = terrainParams.elevation || 10;
     this.levelOfDetail = terrainParams.levelOfDetail || 0;
-    this.wireframe = terrainParams.wireframe || false;
+    this.wireframe = true;
 
     this.terrainMesh = null;
 
@@ -131,9 +131,15 @@ class Terrain {
     this.fallOffMap = generateFallOffMap(MAX_SEGMENTS);
   }
 
-  regenerate() {
+  async regenerate() {
     this.regenerateGeometry();
-    this.update();
+    // await this.generateNoiseMap();
+
+    this.generateColorMap();
+
+    this.setTerrainColor();
+    this.setElevation();
+    this.updateGeometry();
   }
 
   regenerateGeometry() {
@@ -238,7 +244,6 @@ class Terrain {
   }
 
   generateColorMap() {
-    console.log(this.noiseType);
     this.colorMap = canvas.createColorMap({
       noiseMap: this.noiseMap,
       levelOfDetail: this.levelOfDetail,

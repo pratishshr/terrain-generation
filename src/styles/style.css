@@ -129,3 +129,38 @@ body
     font-size: 16px;
     border-radius: 6px;
 }
+
+.wireframe-button {
+    width: 200px;
+    position: fixed;
+    top: 120px;
+    right: 50px;
+    text-decoration: none;
+    color: #171717;
+    font-size: 16px;
+    border: 1px solid #f8fafc;
+    background-color: #f8fafc;
+    padding: 15px 20px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 6px;
+}
+
+.instructions {
+    width: 200px;
+    position: fixed;
+    top: 200px;
+    right: 50px;
+    text-decoration: none;
+    color: #171717;
+    font-size: 16px;
+    border: 1px solid #f8fafc;
+    background-color: #f8fafc;
+
+    padding: 15px 20px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 14px;
+    border-radius: 6px;
+}

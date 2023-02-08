@@ -2,10 +2,10 @@ import { withSpiralLoop } from '../utils/loop';
 import Terrain from './Terrain';
 
 class TerrainManager {
-  constructor({ renderer, useWorker }) {
+  constructor({ renderer, useWorker, initialLevelOfDetail }) {
     this.renderer = renderer;
 
-    this.terrains = [];
+    this.terrains = {};
     this.config = {
       seed: 386,
       scale: 70,
@@ -17,7 +17,7 @@ class TerrainManager {
         y: 0,
       },
       elevation: 18,
-      levelOfDetail: 4,
+      levelOfDetail: initialLevelOfDetail || 4,
       wireframe: false,
     };
 
@@ -40,7 +40,7 @@ class TerrainManager {
     terrain.setPosition(i * terrain.width, 0, -j * terrain.width);
 
     this.renderer.addToScene(terrain.terrainMesh);
-    this.terrains.push(terrain);
+    this.terrains[`[${i}][${j}]`] = terrain;
   }
 
   async generate() {
@@ -48,12 +48,10 @@ class TerrainManager {
       await this.createTerrain(i, j);
     });
 
-    this.renderer.camera.lookAt(this.terrains[0].terrainMesh.position);
+    this.renderer.camera.lookAt(this.terrains['[0][0]'].terrainMesh.position);
   }
 
-  onUpdate() {
-    this.terrains.forEach((terrain) => {});
-  }
+  onUpdate() {}
 }
 
 export default TerrainManager;
