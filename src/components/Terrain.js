@@ -315,7 +315,7 @@ class Terrain {
   }
 
   onUpdate() {
-    this.updateGeometry();
+    // this.updateGeometry();
   }
 }
 
